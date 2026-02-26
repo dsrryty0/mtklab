@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>寶藏 · 城市定向</title>
+  <style>
+    :root{
+      --black:#141414;--red:#EE2922;--blue:#2563EB;--green:#16A34A;
+      --yellow:#FBBF16;--white:#fff;--light:#F5F5F5;--mid:#e6e6e6;--text:#2f2f2f;
+      --safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom);
+      --radius:18px;--shadow:0 8px 24px rgba(0,0,0,.08);
+      --shadow-strong:5px 5px 0 rgba(0,0,0,.88);--stroke:2.5px solid var(--black);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;margin:0;padding:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Roboto","Segoe UI",Arial,sans-serif;
+      background:var(--light);color:var(--text)}
+    button,input,textarea{font-family:inherit}
+    #app{height:100%;display:flex;flex-direction:column;
+      padding-top:var(--safe-top);padding-bottom:var(--safe-bottom);overflow:hidden}
+
+    /* ===== HEADER ===== */
+    header{flex-shrink:0;background:var(--black);color:var(--white);padding:12px 14px;
+      display:flex;justify-content:space-between;align-items:center;position:relative;z-index:50}
+    .header-left{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+    .header-mickey{position:relative;width:34px;height:30px}
+    .header-mickey .hd{width:20px;height:20px;background:var(--white);border-radius:50%;
+      position:absolute;bottom:0;left:7px}
+    .header-mickey .el,.header-mickey .er{width:12px;height:12px;background:var(--white);
+      border-radius:50%;position:absolute;top:0}
+    .header-mickey .el{left:2px}.header-mickey .er{right:2px}
+    header h1{margin:0;font-size:16px;font-weight:900;letter-spacing:.8px}
+    .header-badge{font-size:11px;font-weight:900;background:var(--yellow);color:var(--black);
+      padding:3px 10px;border-radius:999px;white-space:nowrap}
+
+    /* ===== PAGE TRANSITIONS ===== */
+    .page{display:none;flex:1;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+    .page.active{display:block}
+    .page-inner{min-height:100%;width:100%;display:flex;flex-direction:column;align-items:center;
+      animation:pageIn .38s cubic-bezier(.2,.8,.4,1) both}
+    .page.exiting .page-inner{animation:pageOut .20s ease both}
+    @keyframes pageIn{from{opacity:0;filter:blur(8px);transform:translateY(10px)}to{opacity:1;filter:blur(0);transform:translateY(0)}}
+    @keyframes pageOut{from{opacity:1;filter:blur(0)}to{opacity:0;filter:blur(8px)}}
+
+    @keyframes shake{
+      0%,100%{transform:translateX(0)}15%{transform:translateX(-8px)}
+      30%{transform:translateX(8px)}45%{transform:translateX(-6px)}
+      60%{transform:translateX(6px)}75%{transform:translateX(-4px)}90%{transform:translateX(4px)}
+    }
+    .shake{animation:shake .45s ease both}
+
+    /* ===== COMMON ===== */
+    .container{width:100%;max-width:420px;padding:16px 18px 26px}
+    .btn{width:100%;max-width:340px;height:54px;border-radius:999px;border:none;
+      font-size:16px;font-weight:900;cursor:pointer;
+      transition:transform .12s,box-shadow .12s;
+      display:flex;align-items:center;justify-content:center;
+      gap:6px;user-select:none;margin:0 auto}
+    .btn:active{transform:translate(3px,3px)}
+    .btn-red{background:var(--red);color:#fff;box-shadow:4px 4px 0 #9e1a11}
+    .btn-yellow{background:var(--yellow);color:var(--black);box-shadow:4px 4px 0 #c09000}
+    .btn-blue{background:var(--blue);color:#fff;box-shadow:4px 4px 0 #1346a8}
+    .btn-ghost{background:transparent;border:1.5px solid #d8d8d8;color:#999;height:42px;
+      max-width:220px;font-size:14px;box-shadow:none}
+    .pill{display:inline-flex;align-items:center;padding:7px 14px;border-radius:999px;
+      font-size:12px;font-weight:900;letter-spacing:.4px;
+      background:rgba(251,191,22,.18);color:#7a5c00;
+      border:1.5px solid rgba(251,191,22,.35);white-space:nowrap}
+    .card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;width:100%}
+    .section-title{margin:0 0 10px;font-size:15px;font-weight:950;display:flex;align-items:center;gap:8px}
+    .muted{color:#666;font-size:13px;line-height:1.75;margin:0}
+    ul{margin:0;padding-left:18px}li{font-size:13px;line-height:1.75;color:#555}
+    .hidden{display:none!important}
+    .divider{width:calc(100% - 36px);border:none;border-top:2px dashed var(--mid);margin:18px auto}
+    .error-msg{font-size:13px;color:var(--red);font-weight:900;text-align:center;
+      min-height:20px;margin-top:6px}
+
+    /* ===== GATE ===== */
+    .gate-hero{width:100%;background:linear-gradient(140deg,#111,#1e1e1e);color:#fff;
+      padding:40px 18px 28px;text-align:center}
+    .gate-hero h2{margin:0 0 6px;font-size:28px;font-weight:1000;color:var(--yellow);letter-spacing:2px}
+    .gate-hero p{margin:0;color:rgba(255,255,255,.65);font-size:13px;line-height:1.7}
+    .gate-icon{font-size:56px;margin-bottom:14px;display:block;
+      animation:cbounce .9s ease-in-out infinite alternate}
+    @keyframes cbounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+    .field-wrap{width:100%;max-width:420px;padding:20px 18px 6px}
+    .input{width:100%;height:54px;border-radius:16px;border:2px solid var(--mid);padding:0 16px;
+      font-size:16px;background:#fff;outline:none;box-shadow:0 2px 10px rgba(0,0,0,.06);
+      transition:border-color .2s}
+    .input:focus{border-color:rgba(37,99,235,.5)}
+    .field-hint{font-size:12px;color:#999;margin:8px 6px 0}
+    .warning-banner{width:100%;max-width:420px;padding:0 18px;margin-bottom:4px}
+    .warning-box{background:#fffbe6;border:1.5px solid rgba(251,191,22,.6);
+      border-radius:14px;padding:12px 14px;font-size:12px;color:#7a5c00;line-height:1.7}
+    .warning-box strong{display:block;margin-bottom:4px;font-size:13px}
+
+    /* ===== HOME ===== */
+    .home-hero{width:100%;background:var(--black);padding:28px 18px 20px;text-align:center;position:relative}
+    .home-hero h2{margin:8px 0 4px;font-size:32px;font-weight:1000;letter-spacing:3px;color:var(--yellow)}
+    .home-hero p{margin:0;color:rgba(255,255,255,.65);font-size:13px;line-height:1.65}
+    .home-meta{margin:14px auto 0;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+    .home-wave{width:100%;height:44px;background:var(--black);position:relative;margin-top:-1px}
+    .home-wave:after{content:"";position:absolute;bottom:0;left:0;right:0;height:44px;
+      background:var(--light);border-radius:50% 50% 0 0 / 44px}
+    .treasure-icon{width:100%;display:flex;justify-content:center;margin-top:-18px;
+      position:relative;z-index:5;pointer-events:none;font-size:64px}
+    .info-card{border-left:6px solid var(--red)}
+    .info-card.blue{border-left-color:var(--blue)}.info-card.green{border-left-color:var(--green)}
+    .info-card.yellow{border-left-color:var(--yellow)}
+    .info-card .section-title{color:var(--red)}
+    .info-card.blue .section-title{color:var(--blue)}
+    .info-card.green .section-title{color:var(--green)}
+    .info-card.yellow .section-title{color:#b48000}
+
+    /* ===== ROUTES ===== */
+    .route-hero{width:100%;padding:34px 18px 22px;background:linear-gradient(135deg,#1a1a2e,#16213e);
+      color:#fff;text-align:center}
+    .route-hero h2{margin:0 0 6px;font-size:22px;font-weight:1000;color:var(--yellow)}
+    .route-hero p{margin:0;opacity:.78;font-size:13px}
+    .route-card{width:100%;border-radius:18px;background:#fff;border:var(--stroke);
+      box-shadow:var(--shadow-strong);padding:18px;display:flex;align-items:center;gap:14px;
+      cursor:pointer;user-select:none;transition:transform .12s,box-shadow .12s}
+    .route-card:active{transform:translate(4px,4px);box-shadow:1px 1px 0 rgba(0,0,0,.88)}
+    .route-icon{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;
+      justify-content:center;font-size:26px;flex-shrink:0}
+    .route-icon.a{background:var(--red)}.route-icon.b{background:#1a1a2e}
+    .route-text h3{margin:0 0 4px;font-size:16px;font-weight:950}
+    .route-text p{margin:2px 0 0;font-size:12px;color:#888;line-height:1.55}
+    .route-badge{display:inline-block;margin-top:6px;font-size:10px;font-weight:900;
+      letter-spacing:1px;padding:3px 10px;border-radius:999px;background:var(--light);color:#666}
+
+    /* ===== STATION LIST ===== */
+    .list-hero{width:100%;padding:28px 18px 20px;text-align:center;color:#fff}
+    .list-hero.a{background:linear-gradient(135deg,var(--red),#b11c16)}
+    .list-hero.b{background:linear-gradient(135deg,#1a1a2e,#16213e)}
+    .list-hero h2{margin:0 0 6px;font-size:20px;font-weight:1000;color:var(--yellow)}
+    .list-hero p{margin:0;opacity:.75;font-size:12px}
+    .station-item{width:100%;background:#fff;border-radius:16px;border:2px solid var(--mid);
+      padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;
+      box-shadow:0 2px 10px rgba(0,0,0,.06);user-select:none;transition:transform .12s,border-color .12s}
+    .station-item:active{transform:scale(.985)}
+    .station-item.completed{border-color:rgba(22,163,74,.35);background:rgba(22,163,74,.04)}
+    .station-item.locked{opacity:.6}
+    .station-num{width:42px;height:42px;border-radius:50%;color:#fff;
+      font-weight:1000;display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;font-size:14px}
+    .num-a{background:var(--red)}.num-b{background:#1a1a2e}
+    .num-done{background:var(--green)}
+    .station-title{margin:0;font-size:14px;font-weight:950}
+    .station-sub{margin:3px 0 0;font-size:12px;color:#888}
+    .station-poem{margin:4px 0 0;font-size:11px;color:#aaa;font-style:italic;line-height:1.5}
+    .arrow{margin-left:auto;color:#cfcfcf;font-size:20px;flex-shrink:0}
+
+    /* ===== STATION DETAIL ===== */
+    .back{width:100%;max-width:420px;padding:14px 18px 0;border:none;background:none;
+      color:#888;font-size:13px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:4px}
+    .cp-header{width:100%;padding:22px 18px;color:#fff;text-align:center}
+    .cp-header.a{background:linear-gradient(135deg,var(--red),#b11c16)}
+    .cp-header.b{background:linear-gradient(135deg,#1a1a2e,#0f3460)}
+    .cp-header .cp-num{font-size:11px;font-weight:900;letter-spacing:3px;opacity:.75;margin-bottom:6px}
+    .cp-header h2{margin:0 0 4px;font-size:20px;font-weight:1000}
+    .cp-header p{margin:0;font-size:12px;opacity:.75}
+    .poem-block{width:100%;max-width:420px;padding:0 18px;margin-top:14px}
+    .poem-card{background:linear-gradient(135deg,#fffbe6,#fff8d6);border:1.5px solid rgba(251,191,22,.4);
+      border-radius:16px;padding:14px 16px;text-align:center}
+    .poem-label{font-size:10px;font-weight:900;letter-spacing:2px;color:#b48000;margin-bottom:8px}
+    .poem-text{font-size:14px;color:#5a4200;line-height:1.8;font-weight:700}
+
+    /* Lock banner */
+    .lock-banner{margin:14px 0 0;width:100%;background:rgba(251,191,22,.14);
+      border:1.5px solid rgba(251,191,22,.4);color:#7a5c00;padding:12px 16px;
+      border-radius:14px;font-size:13px;font-weight:900;display:none;align-items:center;gap:8px}
+    .locked-state .lock-banner{display:flex}
+    .locked-state .lockable{filter:blur(6px);opacity:.4;pointer-events:none;user-select:none}
+
+    /* Sub-tasks */
+    .task-card{width:100%;background:#fff;border-radius:16px;padding:16px;
+      border:2px solid var(--mid);box-shadow:var(--shadow)}
+    .task-label{font-size:10px;font-weight:900;letter-spacing:2px;margin:0 0 8px;
+      display:flex;align-items:center;gap:6px}
+    .task-label.intro{color:var(--blue)}.task-label.main{color:var(--red)}.task-label.photo{color:var(--green)}
+    .task-q{margin:0 0 12px;font-size:14px;font-weight:900;line-height:1.6;color:var(--black)}
+    .task-hint-text{font-size:12px;color:#888;line-height:1.65;margin:0 0 12px}
+    .answer-input{width:100%;min-height:72px;border-radius:12px;border:2px solid var(--mid);
+      padding:10px 13px;font-size:14px;outline:none;resize:none;background:var(--light);
+      transition:border-color .2s;line-height:1.6}
+    .answer-input:focus{border-color:rgba(37,99,235,.5);background:#fff}
+    .char-count{font-size:11px;color:#bbb;text-align:right;margin-top:4px}
+    .photo-pose{background:linear-gradient(135deg,rgba(22,163,74,.08),rgba(22,163,74,.04));
+      border:1.5px solid rgba(22,163,74,.3);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+    .photo-pose-title{font-size:12px;font-weight:900;color:var(--green);margin:0 0 4px}
+    .photo-pose-desc{font-size:12px;color:#555;margin:0;line-height:1.6}
+    .photo-confirm{display:flex;align-items:center;gap:10px;padding:10px 14px;
+      border-radius:12px;border:2px solid var(--mid);background:var(--light);
+      cursor:pointer;user-select:none;margin-top:6px}
+    .photo-confirm input[type=checkbox]{width:20px;height:20px;accent-color:var(--green);
+      flex-shrink:0;cursor:pointer}
+    .photo-confirm label{font-size:13px;font-weight:700;color:#444;cursor:pointer}
+    .submit-btn{width:100%;height:50px;border-radius:999px;border:none;
+      font-size:15px;font-weight:900;cursor:pointer;margin-top:12px;
+      background:var(--black);color:#fff;box-shadow:4px 4px 0 rgba(0,0,0,.3);
+      transition:transform .12s,box-shadow .12s;display:flex;align-items:center;
+      justify-content:center;gap:6px}
+    .submit-btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 rgba(0,0,0,.3)}
+    .submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .task-success{background:linear-gradient(135deg,rgba(22,163,74,.1),rgba(22,163,74,.05));
+      border:2px solid rgba(22,163,74,.4);border-radius:14px;padding:14px;
+      text-align:center;display:none}
+    .task-success.show{display:block}
+    .task-success .ok-icon{font-size:28px;margin-bottom:6px}
+    .task-success p{margin:0;font-size:13px;font-weight:900;color:#1a6e1a}
+
+    .btn-next{width:100%;height:52px;border-radius:999px;border:none;
+      font-size:15px;font-weight:900;cursor:pointer;margin-top:10px;
+      background:var(--yellow);color:var(--black);box-shadow:4px 4px 0 #c09000;
+      transition:transform .12s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .btn-next:active{transform:translate(3px,3px)}
+    .btn-finish-cp{width:100%;height:52px;border-radius:999px;border:none;
+      font-size:15px;font-weight:900;cursor:pointer;margin-top:10px;
+      background:var(--red);color:#fff;box-shadow:4px 4px 0 #9e1a11;
+      transition:transform .12s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .btn-finish-cp:active{transform:translate(3px,3px)}
+
+    /* ===== SUMMARY PAGE ===== */
+    .summary-hero{width:100%;background:linear-gradient(135deg,#0f3460,#16213e);
+      padding:36px 18px 24px;text-align:center;color:#fff}
+    .summary-hero h2{margin:0 0 6px;font-size:24px;font-weight:1000;color:var(--yellow)}
+    .summary-hero p{margin:0;opacity:.75;font-size:13px}
+    .summary-item{width:100%;border-radius:14px;border:1.5px solid var(--mid);
+      padding:14px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+    .summary-item .si-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+    .si-num{width:32px;height:32px;border-radius:50%;background:var(--green);color:#fff;
+      font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .si-name{font-size:13px;font-weight:950;flex:1}
+    .si-answers{font-size:12px;color:#666;line-height:1.65;padding-left:42px}
+    .si-answers span{display:block}
+
+    /* ===== FINISH ===== */
+    #page-finish{background:#0d0d0d}
+    .finish-inner{min-height:100%;width:100%;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;text-align:center;padding:40px 18px 60px;background:#0d0d0d}
+    .finish-emoji{font-size:60px;margin-bottom:16px;animation:cbounce .9s ease-in-out infinite alternate}
+    .finish-title{margin:0 0 8px;font-size:28px;font-weight:1000;color:var(--yellow);letter-spacing:2px}
+    .finish-sub{margin:0 0 24px;font-size:14px;line-height:1.75;color:rgba(255,255,255,.68)}
+    .endpoint-card{width:100%;max-width:340px;background:linear-gradient(145deg,#fffbea,#fff5c8);
+      border:2.5px solid var(--yellow);border-radius:18px;padding:20px;
+      box-shadow:0 0 0 6px rgba(251,191,22,.1);margin-bottom:20px;text-align:left}
+    .endpoint-card h3{margin:0 0 8px;font-size:14px;font-weight:1000;color:#7a5c00;
+      display:flex;align-items:center;gap:6px}
+    .endpoint-card p{margin:0;font-size:13px;color:#5a4200;line-height:1.7}
+    .endpoint-card .coord{font-size:11px;color:#b48000;margin-top:6px;font-weight:700}
+    .cert-trigger{width:100%;max-width:340px;border-radius:18px;padding:20px;
+      background:linear-gradient(145deg,#1a1a1a,#222);border:2px solid rgba(251,191,22,.5);
+      box-shadow:0 0 0 5px rgba(251,191,22,.08);
+      cursor:pointer;user-select:none;transition:transform .12s;margin-bottom:16px;text-align:center}
+    .cert-trigger:active{transform:scale(.98)}
+    .ct-tag{display:inline-block;margin-top:8px;font-size:11px;font-weight:1000;letter-spacing:1px;
+      color:var(--black);background:var(--yellow);padding:4px 14px;border-radius:999px}
+
+    /* ===== CERTIFICATE MODAL ===== */
+    #cert-modal{position:fixed;top:0;left:0;width:100%;height:100%;
+      display:none;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.92);z-index:200;padding:18px;overflow-y:auto}
+    #cert-modal.active{display:flex;flex-direction:column}
+    #cert-render{
+      width:100%;max-width:360px;
+      background:linear-gradient(160deg,#fffdf0 0%,#fff9de 100%);
+      border-radius:22px;padding:30px 24px 28px;position:relative;
+      box-shadow:0 0 0 4px #FBBF16,0 0 0 9px rgba(251,191,22,.18);
+      text-align:center;
+    }
+    #cert-render:before{content:"";position:absolute;top:10px;left:10px;right:10px;bottom:10px;
+      border:1.5px dashed rgba(251,191,22,.55);border-radius:16px;pointer-events:none}
+    .cert-org{font-size:11px;font-weight:900;letter-spacing:3px;color:#999;margin-bottom:6px}
+    .cert-big-title{margin:0 0 4px;font-size:22px;font-weight:900;color:var(--black);letter-spacing:1px}
+    .cert-en-sub{font-size:10px;color:#aaa;letter-spacing:1.5px;margin-bottom:18px}
+    .cert-icon{font-size:42px;margin-bottom:10px;display:block}
+    .cert-body{background:rgba(251,191,22,.10);border-radius:14px;padding:14px 12px;
+      color:#444;font-size:13px;line-height:1.85;margin-bottom:14px}
+    .cert-body .cert-name-display{font-size:18px;font-weight:900;color:var(--black);margin:6px 0 4px}
+    .cert-body .cert-route-display{font-weight:900;color:#333;margin-top:4px}
+    .cert-stamp{width:76px;height:76px;border-radius:50%;border:3px solid var(--red);
+      display:flex;align-items:center;justify-content:center;flex-direction:column;
+      margin:0 auto 10px;color:var(--red);font-size:9px;font-weight:900;letter-spacing:1px;
+      line-height:1.3;transform:rotate(-12deg)}
+    .cert-stamp .stamp-icon{font-size:16px;margin-bottom:2px;display:block}
+    .cert-meta{font-size:11px;color:#bbb;margin:0 0 18px}
+    .cert-btns{width:100%;max-width:360px;display:flex;gap:10px;justify-content:center;
+      margin-top:14px;flex-wrap:wrap;position:relative;z-index:2}
+    .btn-mini{height:42px;max-width:165px;flex:1;font-size:14px;box-shadow:none;
+      border-radius:999px;border:none;font-weight:900;cursor:pointer}
+    .btn-black{background:var(--black);color:#fff}
+    .btn-outline-dark{background:transparent;border:2px solid rgba(255,255,255,.25);color:#fff}
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-wrap{width:100%;max-width:420px;padding:12px 18px 0}
+    .progress-bar-bg{width:100%;height:8px;background:var(--mid);border-radius:999px;overflow:hidden}
+    .progress-bar-fill{height:100%;border-radius:999px;background:var(--green);
+      transition:width .5s cubic-bezier(.2,.8,.4,1)}
+    .progress-label{font-size:11px;color:#888;margin-top:5px;text-align:right}
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="header-left" onclick="goHome()">
+      <div class="header-mickey"><div class="el"></div><div class="er"></div><div class="hd"></div></div>
+      <h1>寶藏 · 城市定向</h1>
+    </div>
+    <div class="header-badge" id="header-name-badge" style="display:none"></div>
+  </header>
+
+  <!-- ===== PAGE: GATE ===== -->
+  <section id="page-gate" class="page active">
+    <div class="page-inner">
+      <div class="gate-hero">
+        <span class="gate-icon">🗺️</span>
+        <h2>寶藏 · 城市定向</h2>
+        <p>探索城市角落，發現被忽略的人文風景<br>完成任務，解鎖你的專屬探索證書</p>
+      </div>
+      <div class="field-wrap">
+        <input id="player-name" class="input" type="text" maxlength="20"
+               placeholder="輸入你的姓名或暱稱"
+               autocomplete="name"
+               onkeydown="if(event.key==='Enter')enterSite()"/>
+        <div class="field-hint">最多 20 字，將顯示於完成證書</div>
+        <div id="gate-error" class="error-msg"></div>
+      </div>
+      <div class="warning-banner">
+        <div class="warning-box">
+          <strong>⚠️ 出發前注意</strong>
+          帶備足夠飲用水、塗抹防曬。遇到緊急情況請立即聯絡負責人。全程約 4 小時，建議帶備行動電源。
+        </div>
+      </div>
+      <div class="container" style="padding-top:12px;display:flex;flex-direction:column;align-items:center">
+        <button class="btn btn-yellow" onclick="enterSite()">🚀 開始探索</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: HOME ===== -->
+  <section id="page-home" class="page">
+    <div class="page-inner">
+      <div class="home-hero">
+        <div class="home-meta">
+          <span class="pill">📅 2026 / xx / xx</span>
+          <span class="pill">⏱️ 14:00 – 18:30</span>
+        </div>
+        <h2>城市定向</h2>
+        <p>兩條路線，一個終點，一起發現香港</p>
+      </div>
+      <div class="home-wave"></div>
+      <div class="treasure-icon">🏆</div>
+
+      <div class="container" style="padding-top:12px">
+        <div class="card info-card">
+          <h3 class="section-title">🗺️ 關於活動</h3>
+          <p class="muted">「寶藏 · 城市定向」帶你走進平時忽略的香港角落。每個站點都有詩意謎語、觀察任務與合照挑戰，最後兩組在同一終點匯合。</p>
+        </div>
+        <div class="card info-card blue" style="margin-top:14px">
+          <h3 class="section-title">🎯 每個站點流程</h3>
+          <ul>
+            <li>📜 詩意謎語：感受地點氛圍，暗示任務方向。</li>
+            <li>🔍 引子問題：在地點觀察，記下你的發現。</li>
+            <li>📝 通關任務：尋找指定資訊（年份、字詞、數量等）。</li>
+            <li>📸 合照挑戰：7 人按指定姿勢合照，才能過關。</li>
+            <li>✅ 提交後解鎖下一站。</li>
+          </ul>
+        </div>
+        <div class="card info-card green" style="margin-top:14px">
+          <h3 class="section-title">⚠️ 安全注意</h3>
+          <ul>
+            <li>請勿進入禁止區域，注意交通安全。</li>
+            <li>保持環境整潔，不要亂拋垃圾。</li>
+            <li>帶備足夠飲用水，適時補水休息。</li>
+            <li>建議塗抹防曬、戴帽，注意天氣。</li>
+            <li>如感到不適請立即休息並通知負責人。</li>
+          </ul>
+        </div>
+        <div class="card info-card yellow" style="margin-top:14px">
+          <h3 class="section-title">🔋 出發準備</h3>
+          <ul>
+            <li>帶備行動電源（全程約 4 小時大量拍照）。</li>
+            <li>確保手機有足夠流量或 Wi-Fi。</li>
+            <li>A 組車費約 HK$20–25，B 組約 HK$30–40。</li>
+          </ul>
+        </div>
+        <div style="margin-top:20px;display:flex;justify-content:center">
+          <button class="btn btn-red" onclick="goToPage('page-routes')">🚀 選擇路線出發</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: ROUTES ===== -->
+  <section id="page-routes" class="page">
+    <div class="page-inner">
+      <div class="route-hero">
+        <h2>選擇你的路線</h2>
+        <p>兩條路線，同步挑戰，一起在終點匯合</p>
+      </div>
+      <div class="container" style="display:flex;flex-direction:column;gap:16px">
+        <div class="route-card" onclick="selectRoute('a')">
+          <div class="route-icon a">🏙️</div>
+          <div class="route-text">
+            <h3>A 組 · 港島舊時光線</h3>
+            <p>筲箕灣 → 灣仔 → 奧運</p>
+            <p>漁村文化 · 城市重建 · 新舊交融</p>
+            <span class="route-badge">10 個站點 · 約 HK$20–25</span>
+          </div>
+          <div class="arrow">›</div>
+        </div>
+        <div class="route-card" onclick="selectRoute('b')">
+          <div class="route-icon b">🌿</div>
+          <div class="route-text">
+            <h3>B 組 · 東鐵文脈線</h3>
+            <p>上水 → 沙田 → 奧運</p>
+            <p>邊境門戶 · 鐵路歷史 · 圍村文化</p>
+            <span class="route-badge">10 個站點 · 約 HK$30–40</span>
+          </div>
+          <div class="arrow">›</div>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:4px">
+          <button class="btn btn-ghost" onclick="goToPage('page-home')">← 返回首頁</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: STATION LIST ===== -->
+  <section id="page-station-list" class="page">
+    <div class="page-inner">
+      <div class="list-hero" id="list-hero-bar">
+        <h2 id="list-route-name">路線</h2>
+        <p id="list-route-sub">共 10 個站點</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="progress-label">0 / 10 完成</div>
+      </div>
+      <div class="container" id="station-list-container" style="display:flex;flex-direction:column;gap:12px;padding-top:14px"></div>
+      <div class="container" style="padding-top:0;display:flex;justify-content:center">
+        <button class="btn btn-ghost" onclick="goToPage('page-routes')">← 返回路線選擇</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: STATION DETAIL ===== -->
+  <section id="page-station-detail" class="page">
+    <div class="page-inner" id="detail-inner">
+      <button class="back" onclick="goToPage('page-station-list')">‹ 返回站點列表</button>
+
+      <div class="cp-header" id="cp-header">
+        <div class="cp-num" id="cp-num-label">CP 1</div>
+        <h2 id="detail-name">站點名稱</h2>
+        <p id="detail-destination">目的地：—</p>
+      </div>
+
+      <!-- Poem -->
+      <div class="poem-block">
+        <div class="poem-card">
+          <div class="poem-label">✦ 詩意謎語 ✦</div>
+          <div class="poem-text" id="detail-poem">—</div>
+        </div>
+      </div>
+
+      <div class="container" style="padding-top:14px;display:flex;flex-direction:column;gap:14px" id="detail-tasks-wrap">
+
+        <!-- Lock Banner -->
+        <div class="lock-banner" id="lock-banner">🔒 此站點已鎖定，請先完成上一個站點的任務</div>
+
+        <!-- Intro Task -->
+        <div class="task-card lockable" id="task-intro-card">
+          <div class="task-label intro">🔍 引子問題</div>
+          <h3 class="task-q" id="intro-q">—</h3>
+          <p class="task-hint-text" id="intro-hint">—</p>
+          <textarea class="answer-input" id="intro-answer" maxlength="200" placeholder="在這裡記下你的觀察…" oninput="updateCharCount('intro-answer','intro-char')"></textarea>
+          <div class="char-count" id="intro-char">0 / 200</div>
+        </div>
+
+        <!-- Main Task -->
+        <div class="task-card lockable" id="task-main-card">
+          <div class="task-label main">📝 通關任務</div>
+          <h3 class="task-q" id="main-q">—</h3>
+          <p class="task-hint-text" id="main-hint">—</p>
+          <textarea class="answer-input" id="main-answer" maxlength="200" placeholder="記下你找到的答案…" oninput="updateCharCount('main-answer','main-char')"></textarea>
+          <div class="char-count" id="main-char">0 / 200</div>
+        </div>
+
+        <!-- Photo Task -->
+        <div class="task-card lockable" id="task-photo-card">
+          <div class="task-label photo">📸 合照挑戰</div>
+          <div class="photo-pose" id="photo-pose-wrap">
+            <div class="photo-pose-title">👥 7 人全員合照</div>
+            <p class="photo-pose-desc" id="photo-pose-desc">—</p>
+          </div>
+          <div class="photo-confirm" onclick="togglePhotoCheck()">
+            <input type="checkbox" id="photo-check" onchange="checkSubmitReady()"/>
+            <label for="photo-check">✅ 已按指定姿勢完成合照</label>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="lockable">
+          <button class="submit-btn" id="submit-btn" onclick="submitStation()" disabled>提交此站點 →</button>
+        </div>
+
+        <!-- Success -->
+        <div class="task-success" id="task-success">
+          <div class="ok-icon">🎯</div>
+          <p id="success-msg">太棒了！已成功完成此站點。</p>
+        </div>
+
+        <button class="btn-next hidden" id="btn-next-station" onclick="goNextStation()">前往下一站 ➡️</button>
+        <button class="btn-finish-cp hidden" id="btn-finish-route" onclick="goToSummary()">🎉 完成全線，查看總結</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: SUMMARY ===== -->
+  <section id="page-summary" class="page">
+    <div class="page-inner">
+      <div class="summary-hero">
+        <h2>🗂️ 路線總結</h2>
+        <p id="summary-route-name">你完成了所有站點！</p>
+      </div>
+      <div class="container" style="display:flex;flex-direction:column;gap:12px">
+        <div id="summary-list"></div>
+        <button class="btn btn-yellow" style="margin-top:8px" onclick="goToFinish()">🎉 前往終點頁面</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PAGE: FINISH ===== -->
+  <section id="page-finish" class="page">
+    <div class="finish-inner">
+      <div class="finish-emoji">🏆</div>
+      <h2 class="finish-title">挑戰完成！</h2>
+      <p class="finish-sub" id="finish-msg">恭喜你完成所有站點！</p>
+
+      <div class="endpoint-card">
+        <h3>📍 終點集合地點</h3>
+        <p><strong>海輝道公園</strong><br>Hoi Fai Road Park, Tai Kok Tsui<br>奧運站 A 出口，過天橋步行約 5 分鐘</p>
+        <p class="coord">📌 22.317248, 114.156151</p>
+      </div>
+
+      <div class="cert-trigger" onclick="openCert()">
+        <div style="font-size:36px">🏅</div>
+        <div style="font-size:15px;font-weight:1000;color:var(--yellow);margin:8px 0 4px">領取完成證書</div>
+        <p style="font-size:12px;color:rgba(255,255,255,.6);margin:0">點擊查看並下載 PDF</p>
+        <span class="ct-tag">點擊開啟 ›</span>
+      </div>
+      <button class="btn btn-ghost" style="margin-top:6px;color:#666;border-color:#444" onclick="goToPage('page-home')">🏠 返回首頁</button>
+    </div>
+  </section>
+
+  <!-- ===== CERTIFICATE MODAL ===== -->
+  <div id="cert-modal" onclick="handleModalBgClick(event)">
+    <div id="cert-render">
+      <span class="cert-icon">🗺️</span>
+      <div class="cert-org">MAVIS LAB · 城市定向</div>
+      <h2 class="cert-big-title">完成證書</h2>
+      <div class="cert-en-sub">CERTIFICATE OF COMPLETION</div>
+      <div class="cert-body">
+        <div>茲證明</div>
+        <div class="cert-name-display" id="cert-name">（姓名）</div>
+        <div>已成功完成</div>
+        <div class="cert-route-display" id="cert-route">（路線）</div>
+        <div>全部 10 個探索站點</div>
+      </div>
+      <div class="cert-stamp">
+        <span class="stamp-icon">✦</span>
+        MAVIS<br>LAB<br>認證
+      </div>
+      <div class="cert-meta" id="cert-date">日期：—</div>
+    </div>
+    <div class="cert-btns" onclick="event.stopPropagation()">
+      <button class="btn-mini btn-black" onclick="downloadPDF()">⬇ 下載 PDF</button>
+      <button class="btn-mini btn-outline-dark" onclick="closeCert()">收起</button>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<script>
+// ===== DATA =====
+const routesData = {
+  a:{
+    name:"A 組 · 港島舊時光線",
+    sub:"筲箕灣 → 灣仔 → 奧運 · 共 10 個站點",
+    themeClass:"a",
+    stations:[
+      {
+        name:"筲箕灣天后廟",
+        destination:"筲箕灣站 A 出口，步行約 5 分鐘",
+        poem:"波濤女神守東區，紅欄古殿藏漁寶。",
+        intro:{
+          q:"抵達天后廟前，觀察周邊街道——你看到多少間與漁業有關的店鋪或招牌？",
+          hint:"可以是海鮮店、魚具店、漁船相關的任何招牌，記下數量或名稱。"
+        },
+        main:{
+          q:"在廟內尋找最大香爐或主匾額，找出上面刻有的年份或重修年份。",
+          hint:"年份可能以中文紀年（如「光緒二年」）或西曆形式刻在香爐底部或匾額兩側。"
+        },
+        photo:{
+          pose:"祈福尋寶",
+          desc:"全組在天后神像前，作出雙手合十、虔誠祈福的姿勢，模仿出海漁民求神保佑的感覺。"
+        }
+      },
+      {
+        name:"筲箕灣避風塘",
+        destination:"筲箕灣海濱長廊，沿海邊步行約 8 分鐘",
+        poem:"避風塘內船隱藏，海邊舊日訴漁故事。",
+        intro:{
+          q:"在避風塘邊，你能看到多少艘停泊中的船？請數一數並記下大概數目。",
+          hint:"包含漁船、艇屋、遊艇等，靜靜觀察一分鐘後再記錄。"
+        },
+        main:{
+          q:"在海濱長廊的說明牌上，找一個與「漁民傳統」相關的關鍵詞（例如蜑家、艇家等）。",
+          hint:"說明牌通常以中英文書寫，請抄下你找到的關鍵詞。"
+        },
+        photo:{
+          pose:"發現海寶",
+          desc:"全組站在最具特色的漁船或艇屋背景前，每人手搭眼睛作「遠望」姿勢，彷彿發現遠方寶藏。"
+        }
+      },
+      {
+        name:"西灣河太安樓",
+        destination:"西灣河站 B 出口，步行約 3 分鐘",
+        poem:"舊樓商場藏小食林，地道味道守東區。",
+        intro:{
+          q:"進入太安樓前，在外牆或入口處數一數共有多少個招牌？",
+          hint:"只計算你站在入口處能直接看到的招牌，不用走入商場。"
+        },
+        main:{
+          q:"在太安樓內選一家最熱鬧的小食檔，記錄它的招牌名稱或店名的最後一個字。",
+          hint:"「最熱鬧」可以按排隊人龍或聲音判斷，選你認為最有代表性的一家。"
+        },
+        photo:{
+          pose:"品嘗隱藏寶",
+          desc:"全組在最熱鬧的小食攤前，每人拿著一份小食，做出誇張的「好食表情」，傳達地道美食的驚喜感。"
+        }
+      },
+      {
+        name:"太古公園",
+        destination:"太古站 B 出口，步行約 8 分鐘",
+        poem:"太古城中綠意寶，隱藏公園守寧靜。",
+        intro:{
+          q:"走進公園後停下來，閉眼聆聽 30 秒——你聽到多少種不同的聲音？",
+          hint:"可以是鳥聲、風聲、腳步聲、水聲等。記下你能區分的種類數目。"
+        },
+        main:{
+          q:"在公園內找一棵大樹或一個固定裝置，在其標示牌上記錄年份或一段說明文字。",
+          hint:"很多公園樹木都有植樹記念牌，部分有年份；裝置可能有介紹板。"
+        },
+        photo:{
+          pose:"擁抱綠寶",
+          desc:"全組在公園最茂密的綠蔭角落，每人選一棵樹輕輕靠著，以放鬆的姿勢呈現「城市人暫時逃離喧鬧」的感覺。"
+        }
+      },
+      {
+        name:"鰂魚涌公園",
+        destination:"太古 / 鰂魚涌站之間，步行約 10 分鐘",
+        poem:"鰂魚涌邊綠洲寶，都市喧鬧中藏寧靜。",
+        intro:{
+          q:"在公園內找一個面向維港或海景的位置，描述你看到的海面上有什麼。",
+          hint:"可以是船隻、對岸建築、燈塔等，用一至兩句話描述你看到的景象。"
+        },
+        main:{
+          q:"在公園內找一個路牌、座椅編號或說明裝置，記錄其上的編號或顏色描述。",
+          hint:"公園內通常有分區指示牌或設施標號，找到後如實記錄。"
+        },
+        photo:{
+          pose:"發現都市綠寶",
+          desc:"全組在能看到海景或特色裝置的位置，以最舒展的姿勢呈現「終於找到都市中的寧靜」，可以手指海景。"
+        }
+      },
+      {
+        name:"北角油街實現",
+        destination:"北角站 B 出口，步行約 8 分鐘",
+        poem:"舊倉庫變身藝術寶庫，油街隱藏創意靈魂。",
+        intro:{
+          q:"走入油街實現前，在外牆或周邊街道找一件你覺得最有趣的裝置或塗鴉，描述它。",
+          hint:"不需要很長，用兩三句話說明它在哪裡、長什麼樣子，以及你為什麼覺得有趣。"
+        },
+        main:{
+          q:"在油街實現園區內，找一件藝術裝置並記錄：藝術家名字或創作年份。",
+          hint:"大部分作品旁都有介紹牌，可能在側面或底部，找到後抄下。"
+        },
+        photo:{
+          pose:"藝術尋寶",
+          desc:"全組在最搶眼的裝置或彩繪牆前，各自作出一個「藝術姿勢」（可以模仿裝置形態），展現創意。"
+        }
+      },
+      {
+        name:"大坑蓮花宮",
+        destination:"天后站 A 出口，步行約 6 分鐘",
+        poem:"大坑蓮花守舊村，女神靈氣藏火龍。",
+        intro:{
+          q:"在前往蓮花宮途中，留意大坑村的街道——你找到多少個與「火龍」或「舞火龍」相關的文字或圖案？",
+          hint:"可以是路牌、壁畫、商店招牌等，記錄你找到的數量或位置。"
+        },
+        main:{
+          q:"走入蓮花宮主殿，仔細數一數入口第一排蓮花圖案的數量，或記錄一個明顯蓮花雕刻的顏色。",
+          hint:"蓮花圖案可能在門柱、橫樑或彩繪牌匾上，細心觀察，不要只掃一眼。"
+        },
+        photo:{
+          pose:"蓮花守護",
+          desc:"全組在蓮花宮廟門前，雙手合攏作蓮花手印（指尖對齊、掌心向上），如蓮花般展開排成一列。"
+        }
+      },
+      {
+        name:"維多利亞公園",
+        destination:"天后站 A 出口，步行約 6 分鐘",
+        poem:"維多利亞守鬧市，綠蔭小徑藏寧靜。",
+        intro:{
+          q:"進入維多利亞公園後，找一條小徑走一分鐘——途中看到多少個使用公園設施的市民？",
+          hint:"包含晨運、遛狗、打球的人，只計算你在那一條小徑上能直接看到的人。"
+        },
+        main:{
+          q:"找到大噴水池附近的雕像或紀念牌，記錄其上的年份或一個關鍵詞。",
+          hint:"噴水池範圍可能有紀念銘牌、人物介紹或建造年份等資訊。"
+        },
+        photo:{
+          pose:"噴泉許願",
+          desc:"全組圍繞噴水池站成半圓，每人做出「許願投幣」的姿勢（手持想象中的硬幣向池中投），面帶微笑。"
+        }
+      },
+      {
+        name:"泰源街玩具街",
+        destination:"灣仔站 A 出口，步行約 4 分鐘",
+        poem:"灣仔巷弄藏童趣，舊店堆滿復古寶。",
+        intro:{
+          q:"走入泰源街前，留意整條街的感覺——你覺得這條街與旁邊的街道有什麼最大的不同？",
+          hint:"從街道闊窄、顏色、聲音、氣味等任何角度描述，用兩三句話表達你的感受。"
+        },
+        main:{
+          q:"選一間玩具店，找一件你認為「最復古」的玩具，記錄它的價格或店名的最後一個字。",
+          hint:"「復古」由你定義，可以是鐵皮玩具、舊卡通人物公仔等，記錄你選的那件即可。"
+        },
+        photo:{
+          pose:"童年尋寶",
+          desc:"全組在天花掛滿玩具的走廊或店門前，每人手持一件玩具（或假裝拿著），露出最純真的童年笑容。"
+        }
+      },
+      {
+        name:"灣仔利東街",
+        destination:"灣仔站 A 出口，步行約 6 分鐘",
+        poem:"婚卡舊街重生地，舊樓新貌藏故事。",
+        intro:{
+          q:"走入利東街，停在中段，往頭頂看——數出你能看到的紅色燈籠總數。",
+          hint:"只計算你站在同一位置能直接看到的紅色燈籠，不需要走完整條街。"
+        },
+        main:{
+          q:"在利東街找一個舊招牌或藝術裝置，記錄其上的年份或一個最有記憶感的關鍵字。",
+          hint:"仿舊招牌或藝術裝置上可能有印刷年份、設計師名字或相關文字，細心找找。"
+        },
+        photo:{
+          pose:"舊新交融",
+          desc:"全組站在能同時看到舊招牌與新建築的位置，一半人指向舊的、一半人指向新的，展現新舊並存的城市面貌。"
+        }
+      }
+    ]
+  },
+  b:{
+    name:"B 組 · 東鐵文脈線",
+    sub:"上水 → 沙田 → 奧運 · 共 10 個站點",
+    themeClass:"b",
+    stations:[
+      {
+        name:"粉嶺圍",
+        destination:"粉嶺站 C 出口，步行約 15 分鐘",
+        poem:"古老圍村守北區，牆內隱藏傳統寶藏。",
+        intro:{
+          q:"在前往粉嶺圍途中，留意沿路的環境——你覺得這裡的街道與市區最大的不同是什麼？",
+          hint:"可以從建築密度、人流、聲音、綠化等角度描述，用兩三句話說說你的感受。"
+        },
+        main:{
+          q:"在粉嶺圍門樓附近，找到對聯並抄下上聯最後三個字。",
+          hint:"對聯一般刻在門柱上，左右各一，上聯通常在右邊（面對門時）。"
+        },
+        photo:{
+          pose:"守護圍村",
+          desc:"全組在圍村門樓正前方，擺出威武守護的姿勢，如古時守門士兵，守護這座圍村。"
+        }
+      },
+      {
+        name:"香港鐵路博物館",
+        destination:"大埔墟站，步行約 10 分鐘",
+        poem:"舊軌道訴說往事，鋼鐵車廂載百年情。",
+        intro:{
+          q:"走入鐵路博物館前，在舊車站建築外觀察——這座建築與你平時見到的車站有什麼不同？",
+          hint:"可以描述建築風格、材料、顏色、裝飾等，用兩三句話表達你的觀察。"
+        },
+        main:{
+          q:"在展示區選一節火車車卡，抄下車卡編號，並將編號中所有數字相加，寫下總和。",
+          hint:"例如編號「E201」，數字為 2+0+1=3。找到編號後計算並記錄你的答案。"
+        },
+        photo:{
+          pose:"懷舊列車",
+          desc:"全組在展示的舊火車車廂旁，模仿 1950-60 年代乘客的姿勢——有人假裝等車、有人假裝揮手道別、有人假裝看窗外。"
+        }
+      },
+      {
+        name:"大埔文物館 (Island House)",
+        destination:"大埔墟站，步行約 15 分鐘",
+        poem:"綠蔭深處官邸隱，大埔興衰此中尋。",
+        intro:{
+          q:"走在往大埔文物館的路上，留意兩側環境——你能看到多少棵高大的樹木（超過你兩倍身高）？",
+          hint:"大概數一數即可，感受舊日英治行政官邸選址如何利用自然環境。"
+        },
+        main:{
+          q:"在 Island House 外牆或介紹牌上，找到並抄下一個建造或重修年份（19xx 或 20xx）。",
+          hint:"年份可能刻在外牆石碑、古蹟介紹牌或門牌上，仔細搜尋各個角落。"
+        },
+        photo:{
+          pose:"歷史見證",
+          desc:"全組在 Island House 正面外牆前，做出莊重的「歷史見證者」姿勢——手指建築，臉帶嚴肅與敬意。"
+        }
+      },
+      {
+        name:"嘉利美食（寶湖花園）",
+        destination:"大埔墟一帶，步行約 10 分鐘",
+        poem:"街坊滋味最難忘，小店煙火守日常。",
+        intro:{
+          q:"在嘉利美食門外，觀察排隊或路過的人——你覺得這裡的食客主要是什麼類型的人？",
+          hint:"可以描述年齡層、打扮、行為等，感受「街坊食肆」與連鎖快餐的不同客群。"
+        },
+        main:{
+          q:"全組購買至少一份小食，記錄小食的名稱，並用三個形容詞描述它的味道或口感。",
+          hint:"三個形容詞可以是：鹹、滑、煙韌、香、燙等，用你自己的真實感受描述。"
+        },
+        photo:{
+          pose:"街頭品味",
+          desc:"全組在嘉利美食門外，每人拿著購買的小食，做出「街頭美食家」的品嘗姿勢，誇張地表現美食的滿足感。"
+        }
+      },
+      {
+        name:"沙田曾大屋",
+        destination:"沙田圍站，步行約 10 分鐘",
+        poem:"客家大院矗城間，青磚灰瓦訴宗情。",
+        intro:{
+          q:"在前往曾大屋途中，觀察周邊高樓與曾大屋的對比——用一句話描述這種感覺。",
+          hint:"想想在現代新市鎮中突然出現一座 1840 年代圍屋，這種衝突感是什麼感覺。"
+        },
+        main:{
+          q:"在曾大屋門匾或石刻上選一個你覺得最有「力量感」的中文字，抄下來並寫出你的個人詮釋。",
+          hint:"可以是仁、義、信、德等任何你在門匾或石刻上真實看到的字，詮釋屬你自己的想法。"
+        },
+        photo:{
+          pose:"宗族重聚",
+          desc:"全組在曾大屋大門前，站成緊密的大家庭合照姿勢，最高的人站中間，其他人緊靠在一起，展現家族凝聚力。"
+        }
+      },
+      {
+        name:"沙田車公廟",
+        destination:"車公廟站，步行約 5 分鐘",
+        poem:"轉動風車祈好運，名將威儀護蒼生。",
+        intro:{
+          q:"走入車公廟前，在廟外留意參拜的人群——你觀察到他們最常做的一個動作是什麼？",
+          hint:"例如轉風車、上香、跪拜等，記下你觀察到最多人做的一個動作。"
+        },
+        main:{
+          q:"在轉運輪附近選一個最顯眼的香爐或牌匾，記錄：它的主要顏色，或牌匾上的文字總字數。",
+          hint:"文字總字數請逐字細數，顏色請如實描述（如：紅色、金色、黑底紅字等）。"
+        },
+        photo:{
+          pose:"轉運祈福",
+          desc:"全組圍著轉運風車，每人伸出一根手指假裝「撥動」風車，臉上帶著虔誠又期待好運的表情。"
+        }
+      },
+      {
+        name:"大圍舊村後巷",
+        destination:"大圍站，步行約 8 分鐘",
+        poem:"窄巷深處藏記憶，鐵閘花紋守舊時。",
+        intro:{
+          q:"走入後巷前，站在巷口感受一下——這條巷與你平時走的街道在感官上有何不同？",
+          hint:"可以從視覺（窄/暗/舊）、氣味（潮濕/煙火氣）、聲音等角度描述。"
+        },
+        main:{
+          q:"在後巷中找一扇你認為「最有個性」的舊鐵閘，描述其上的圖案、花紋或你印象最深的細節。",
+          hint:"鐵閘可能有幾何圖案、植物紋樣或文字，選你覺得最特別的一扇如實描述。"
+        },
+        photo:{
+          pose:"巷弄探索",
+          desc:"全組在最有感覺的舊鐵閘或窄巷前，做出探索者的姿勢——有人蹲下細看細節，有人站立觀察遠處，有人用手觸碰牆壁，如同考古隊員。"
+        }
+      },
+      {
+        name:"九龍塘建築群",
+        destination:"九龍塘站，步行約 8 分鐘",
+        poem:"低密宅第映優雅，校園鐘聲迴巷間。",
+        intro:{
+          q:"在九龍塘住宅區步行時，留意這裡的建築密度——與你平時住的地方相比，這裡每條街的感覺有何不同？",
+          hint:"可以描述建築高度、街道寬度、綠化程度等，感受香港少有的低密度住宅區特色。"
+        },
+        main:{
+          q:"在九龍塘找一棟你覺得最有個性的低密度建築，記錄其門牌號碼、建築名稱或你最注意到的一個特徵。",
+          hint:"九龨塘有許多建於 1950-70 年代的花園洋房，留意門牌、外牆風格或庭園設計。"
+        },
+        photo:{
+          pose:"城市漫步",
+          desc:"全組在最美的一段九龍塘街道上，模仿悠閒漫步的姿勢，可以手挽手、有人在前引路、其他人在後邊走邊談，展現「城市探索者」的悠然氣質。"
+        }
+      },
+      {
+        name:"上海街 618",
+        destination:"旺角東站，步行約 8 分鐘",
+        poem:"老唐樓換新姿態，旺角街頭藏古意。",
+        intro:{
+          q:"在前往上海街 618 的途中，數一數你走過多少間傳統老店（非連鎖、非大型商場）。",
+          hint:"包含藥材店、五金店、傳統食肆、老字號等，記下數量或你印象最深的一間店名。"
+        },
+        main:{
+          q:"在上海街 618 的建築外，找到並記錄這座建築的原始建造年份或重建前的歷史記載。",
+          hint:"介紹牌、外牆石刻或紀念牌匾通常有記錄，仔細找找建築各個角落。"
+        },
+        photo:{
+          pose:"拾年光影",
+          desc:"全組在上海街 618 外牆前，一半人轉身背向鏡頭望著建築（象徵回望歷史），另一半人面向鏡頭微笑（象徵面向未來），形成新舊對話。"
+        }
+      },
+      {
+        name:"奧運站終點集結",
+        destination:"奧運站 A 出口，前往海輝道公園",
+        poem:"奧運地標連兩線，寶藏終點現眼前。",
+        intro:{
+          q:"在奧運站內，找到指向「Hoi Fai Road」或「海輝道」的指示牌，記下該指示牌所在的樓層或出口編號。",
+          hint:"奧運站內有多個出口，找到正確方向的指示牌後記錄你看到的文字或出口號碼。"
+        },
+        main:{
+          q:"步行前往海輝道公園，在公園範圍內找一個你最喜歡的角落，用一句話描述你在這裡看到的景色。",
+          hint:"可以是維港景色、公園裝置、特定樹木或任何讓你印象深刻的事物。"
+        },
+        photo:{
+          pose:"終極集結",
+          desc:"全組在海輝道公園最開揚的位置，面向維港，以最開心、最有成就感的姿勢合照——可以高舉雙手、跳躍或互相擁抱，慶祝完成整條路線！"
+        }
+      }
+    ]
+  }
+};
+
+// ===== STATE =====
+const state = {
+  playerName:"",
+  routeKey:null,
+  stationIndex:0,
+  progress:{a:0, b:0},
+  answers:{a:[], b:[]}
+};
+
+// ===== LOCALSTORAGE =====
+function saveState(){
+  try{ localStorage.setItem('treasure_state', JSON.stringify(state)); }catch(e){}
+}
+function loadState(){
+  try{
+    const s = localStorage.getItem('treasure_state');
+    if(s){
+      const saved = JSON.parse(s);
+      Object.assign(state, saved);
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// ===== PAGE NAV =====
+function goToPage(id){
+  const cur = document.querySelector('.page.active');
+  const nxt = document.getElementById(id);
+  if(!nxt || cur === nxt) return;
+  if(cur){
+    cur.classList.add('exiting');
+    setTimeout(()=>{
+      cur.classList.remove('active','exiting');
+      nxt.classList.add('active');
+      nxt.scrollTop = 0;
+    }, 200);
+  } else {
+    nxt.classList.add('active');
+    nxt.scrollTop = 0;
+  }
+}
+
+function goHome(){
+  if(state.playerName) goToPage('page-home');
+  else goToPage('page-gate');
+}
+
+// ===== GATE =====
+function enterSite(){
+  const input = document.getElementById('player-name');
+  const errEl = document.getElementById('gate-error');
+  const name = input.value.trim();
+  if(!name){
+    errEl.textContent = "⚠️ 請先輸入姓名或暱稱才能開始！";
+    const wrap = document.querySelector('.field-wrap');
+    wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
+    input.focus();
+    return;
+  }
+  errEl.textContent = "";
+  state.playerName = name;
+  document.getElementById('header-name-badge').textContent = name;
+  document.getElementById('header-name-badge').style.display = 'block';
+  saveState();
+  goToPage('page-home');
+}
+
+// ===== ROUTE SELECT =====
+function selectRoute(key){
+  state.routeKey = key;
+  const data = routesData[key];
+  const hero = document.getElementById('list-hero-bar');
+  hero.className = 'list-hero ' + data.themeClass;
+  document.getElementById('list-route-name').textContent = data.name;
+  document.getElementById('list-route-sub').textContent = data.sub;
+
+  // Init answers array if needed
+  if(!state.answers[key] || state.answers[key].length !== data.stations.length){
+    state.answers[key] = data.stations.map(()=>({intro:'', main:'', photoConfirmed:false, completed:false}));
+  }
+
+  renderStationList();
+  goToPage('page-station-list');
+}
+
+function renderStationList(){
+  const key = state.routeKey;
+  const data = routesData[key];
+  const done = state.progress[key];
+  const container = document.getElementById('station-list-container');
+  container.innerHTML = "";
+
+  data.stations.forEach((s, i)=>{
+    const isCompleted = state.answers[key][i] && state.answers[key][i].completed;
+    const isLocked = i > 0 && done < i;
+
+    const el = document.createElement('div');
+    el.className = 'station-item' + (isCompleted ? ' completed' : '') + (isLocked ? ' locked' : '');
+    el.onclick = ()=> openStation(i);
+
+    const numClass = isCompleted ? 'station-num num-done' : `station-num num-${key}`;
+    const numIcon = isCompleted ? '✓' : (i+1);
+    const statusText = isCompleted ? '✅ 已完成' : (isLocked ? '🔒 待解鎖' : '📝 可挑戰');
+
+    el.innerHTML = `
+      <div class="${numClass}">${numIcon}</div>
+      <div style="flex:1">
+        <p class="station-title">${s.name}</p>
+        <p class="station-sub">${statusText}</p>
+        <p class="station-poem">${s.poem}</p>
+      </div>
+      <div class="arrow">›</div>
+    `;
+    container.appendChild(el);
+  });
+
+  // Update progress bar
+  const total = data.stations.length;
+  const completedCount = state.answers[key].filter(a=>a&&a.completed).length;
+  document.getElementById('progress-fill').style.width = (completedCount/total*100) + '%';
+  document.getElementById('progress-label').textContent = `${completedCount} / ${total} 完成`;
+}
+
+// ===== OPEN STATION =====
+function openStation(idx){
+  state.stationIndex = idx;
+  const key = state.routeKey;
+  const s = routesData[key].stations[idx];
+  const done = state.progress[key];
+  const isUnlocked = (idx === 0) || (done >= idx);
+  const isCompleted = state.answers[key][idx] && state.answers[key][idx].completed;
+
+  // Header
+  const cpHeader = document.getElementById('cp-header');
+  cpHeader.className = 'cp-header ' + routesData[key].themeClass;
+  document.getElementById('cp-num-label').textContent = `CP ${idx+1}`;
+  document.getElementById('detail-name').textContent = s.name;
+  document.getElementById('detail-destination').textContent = '📍 ' + s.destination;
+  document.getElementById('detail-poem').textContent = s.poem;
+
+  // Tasks
+  document.getElementById('intro-q').textContent = s.intro.q;
+  document.getElementById('intro-hint').textContent = '💡 ' + s.intro.hint;
+  document.getElementById('main-q').textContent = s.main.q;
+  document.getElementById('main-hint').textContent = '💡 ' + s.main.hint;
+  document.getElementById('photo-pose-desc').textContent =
+    `姿勢主題：「${s.photo.pose}」\n\n${s.photo.desc}`;
+
+  // Restore saved answers
+  const saved = state.answers[key][idx];
+  document.getElementById('intro-answer').value = saved ? saved.intro : '';
+  document.getElementById('main-answer').value = saved ? saved.main : '';
+  document.getElementById('photo-check').checked = saved ? saved.photoConfirmed : false;
+  updateCharCount('intro-answer','intro-char');
+  updateCharCount('main-answer','main-char');
+
+  // Lock state
+  const detailTasksWrap = document.getElementById('detail-tasks-wrap');
+  const lockBanner = document.getElementById('lock-banner');
+  if(!isUnlocked){
+    detailTasksWrap.classList.add('locked-state');
+    lockBanner.style.display = 'flex';
+  } else {
+    detailTasksWrap.classList.remove('locked-state');
+    lockBanner.style.display = 'none';
+  }
+
+  // Completed state
+  const successEl = document.getElementById('task-success');
+  const submitBtn = document.getElementById('submit-btn');
+  const btnNext = document.getElementById('btn-next-station');
+  const btnFinish = document.getElementById('btn-finish-route');
+
+  if(isCompleted){
+    successEl.classList.add('show');
+    document.getElementById('success-msg').textContent = '✅ 此站點已完成！你可以繼續瀏覽或前往下一站。';
+    submitBtn.style.display = 'none';
+
+    const total = routesData[key].stations.length;
+    if(idx < total - 1){
+      btnNext.classList.remove('hidden');
+      btnFinish.classList.add('hidden');
+    } else {
+      btnNext.classList.add('hidden');
+      btnFinish.classList.remove('hidden');
+    }
+  } else {
+    successEl.classList.remove('show');
+    submitBtn.style.display = 'flex';
+    btnNext.classList.add('hidden');
+    btnFinish.classList.add('hidden');
+    checkSubmitReady();
+  }
+
+  // Disable inputs if already completed
+  document.getElementById('intro-answer').disabled = isCompleted;
+  document.getElementById('main-answer').disabled = isCompleted;
+  document.getElementById('photo-check').disabled = isCompleted;
+
+  goToPage('page-station-detail');
+}
+
+// ===== SUBMIT =====
+function checkSubmitReady(){
+  const introVal = document.getElementById('intro-answer
