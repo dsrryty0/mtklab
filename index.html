@@ -1,0 +1,2550 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>港鐵尋寶大冒險 2025</title>
+  <style>
+    /* ===========================
+       CSS 變數 & Reset
+    =========================== */
+    :root {
+      --primary:       #e60012;
+      --primary-dark:  #b30010;
+      --secondary:     #003087;
+      --accent:        #f5a623;
+      --success:       #27ae60;
+      --danger:        #e74c3c;
+      --bg:            #f4f6f9;
+      --card-bg:       #ffffff;
+      --text:          #2c3e50;
+      --text-light:    #7f8c8d;
+      --border:        #dce1e7;
+      --shadow-sm:     0 2px 8px rgba(0,0,0,.08);
+      --shadow-md:     0 4px 20px rgba(0,0,0,.12);
+      --shadow-lg:     0 8px 40px rgba(0,0,0,.18);
+      --radius-sm:     8px;
+      --radius-md:     14px;
+      --radius-lg:     22px;
+      --transition:    0.28s cubic-bezier(.4,0,.2,1);
+      --font:          'Helvetica Neue', Arial, 'PingFang TC',
+                       'Microsoft JhengHei', sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      font-family: var(--font);
+    }
+
+    input, textarea {
+      font-family: var(--font);
+      outline: none;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* ===========================
+       通用佈局
+    =========================== */
+    .app-wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--card-bg);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .page {
+      display: none;
+      min-height: 100vh;
+      flex-direction: column;
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    /* ===========================
+       頂部導航欄
+    =========================== */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-md);
+    }
+
+    .top-bar .logo-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+
+    .top-bar .back-btn {
+      background: rgba(255,255,255,.18);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: var(--transition);
+    }
+
+    .top-bar .back-btn:active {
+      background: rgba(255,255,255,.32);
+      transform: scale(.93);
+    }
+
+    .top-bar .progress-text {
+      font-size: .78rem;
+      opacity: .88;
+    }
+
+    /* ===========================
+       通用按鈕樣式
+    =========================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 28px;
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      transition: var(--transition);
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(230,0,18,.28);
+    }
+
+    .btn-primary:active {
+      background: var(--primary-dark);
+      transform: translateY(2px);
+      box-shadow: 0 2px 6px rgba(230,0,18,.2);
+    }
+
+    .btn-secondary {
+      background: var(--secondary);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0,48,135,.22);
+    }
+
+    .btn-secondary:active {
+      background: #002060;
+      transform: translateY(2px);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(39,174,96,.28);
+    }
+
+    .btn-success:active {
+      background: #219150;
+      transform: translateY(2px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    .btn-ghost:active {
+      background: rgba(230,0,18,.07);
+    }
+
+    /* ===========================
+       通用卡片
+    =========================== */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .card-body {
+      padding: 18px 20px;
+    }
+
+    /* ===========================
+       標籤 / Badge
+    =========================== */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .badge-red    { background: #fde8ea; color: var(--primary); }
+    .badge-blue   { background: #e8edf8; color: var(--secondary); }
+    .badge-green  { background: #e8f8ef; color: var(--success); }
+    .badge-gold   { background: #fef5e4; color: #c87a00; }
+    .badge-grey   { background: #f0f2f5; color: var(--text-light); }
+
+    /* ===========================
+       表單元素
+    =========================== */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: .97rem;
+      color: var(--text);
+      background: #fafbfc;
+      transition: border-color var(--transition);
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      background: #fff;
+    }
+
+    .form-input.error  { border-color: var(--danger); }
+    .form-input.success { border-color: var(--success); }
+
+    /* ===========================
+       提示訊息
+    =========================== */
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: .9rem;
+      font-weight: 500;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      animation: fadeIn .3s ease;
+    }
+
+    .alert-success {
+      background: #eafaf1;
+      color: #1e8449;
+      border-left: 4px solid var(--success);
+    }
+
+    .alert-danger {
+      background: #fdf0f0;
+      color: #c0392b;
+      border-left: 4px solid var(--danger);
+    }
+
+    .alert-info {
+      background: #eaf0fb;
+      color: #1a5276;
+      border-left: 4px solid var(--secondary);
+    }
+
+    .alert-warning {
+      background: #fef9ec;
+      color: #7d5a00;
+      border-left: 4px solid var(--accent);
+    }
+
+    /* ===========================
+       分隔線
+    =========================== */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 18px 0;
+    }
+
+    /* ===========================
+       通用動畫
+    =========================== */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.06); }
+    }
+
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      40%       { transform: translateY(-10px); }
+      60%       { transform: translateY(-5px); }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .animate-fadeIn    { animation: fadeIn    .4s ease both; }
+    .animate-fadeInUp  { animation: fadeInUp  .5s ease both; }
+    .animate-pulse     { animation: pulse     1.6s infinite; }
+    .animate-bounce    { animation: bounce    1s infinite; }
+
+    /* ===========================
+       頁腳
+    =========================== */
+    .footer {
+      background: #1a1a2e;
+      color: rgba(255,255,255,.55);
+      text-align: center;
+      padding: 18px 20px;
+      font-size: .75rem;
+      line-height: 1.8;
+    }
+
+    .footer strong {
+      color: rgba(255,255,255,.85);
+    }
+  </style>
+    /* ===========================
+       登入頁樣式
+    =========================== */
+    .login-page {
+      background: linear-gradient(145deg, #e60012 0%, #003087 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    .login-logo {
+      width: 90px;
+      height: 90px;
+      background: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.22);
+      animation: bounce 2s infinite;
+    }
+
+    .login-title {
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 6px;
+      letter-spacing: .04em;
+    }
+
+    .login-subtitle {
+      color: rgba(255,255,255,.75);
+      font-size: .9rem;
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .login-card .form-label {
+      font-size: .9rem;
+    }
+
+    .group-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .group-btn {
+      padding: 14px 10px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background: #fafbfc;
+      font-size: .92rem;
+      font-weight: 600;
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .group-btn .group-icon { font-size: 1.6rem; }
+
+    .group-btn.selected {
+      border-color: var(--primary);
+      background: #fff0f1;
+      color: var(--primary);
+    }
+
+    .group-btn:active {
+      transform: scale(.97);
+    }
+
+    /* ===========================
+       首頁 Hero Banner
+    =========================== */
+    .hero-banner {
+      background: linear-gradient(135deg, #e60012 0%, #003087 100%);
+      padding: 28px 20px 32px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.08);
+    }
+
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      bottom: -30px; left: -30px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+    }
+
+    .hero-greeting {
+      font-size: .88rem;
+      opacity: .8;
+      margin-bottom: 4px;
+    }
+
+    .hero-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 18px;
+      margin-top: 16px;
+    }
+
+    .hero-stat {
+      background: rgba(255,255,255,.15);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      text-align: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .hero-stat-num {
+      font-size: 1.4rem;
+      font-weight: 800;
+    }
+
+    .hero-stat-label {
+      font-size: .7rem;
+      opacity: .8;
+    }
+
+    /* ===========================
+       進度條
+    =========================== */
+    .progress-wrap {
+      padding: 18px 20px 0;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .progress-title {
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .progress-pct {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .progress-bar-bg {
+      height: 10px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 99px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ===========================
+       站點列表
+    =========================== */
+    .station-list {
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--text-light);
+      padding: 6px 4px 4px;
+    }
+
+    .station-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 14px 16px;
+      border: 2px solid transparent;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .station-card.unlocked {
+      border-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .station-card.unlocked:active {
+      transform: scale(.98);
+      box-shadow: var(--shadow-md);
+    }
+
+    .station-card.completed {
+      background: #f0faf4;
+      border-color: var(--success);
+      opacity: .85;
+    }
+
+    .station-card.locked {
+      opacity: .48;
+      filter: grayscale(.6);
+    }
+
+    .station-thumb {
+      width: 58px;
+      height: 58px;
+      border-radius: var(--radius-sm);
+      object-fit: cover;
+      flex-shrink: 0;
+      background: var(--border);
+    }
+
+    .station-thumb-placeholder {
+      width: 58px;
+      height: 58px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--border), #e8eaf0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .station-info { flex: 1; min-width: 0; }
+
+    .station-code {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .station-name {
+      font-size: .97rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .station-poem {
+      font-size: .75rem;
+      color: var(--text-light);
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .station-status-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    /* ===========================
+       站點詳情頁
+    =========================== */
+    .station-detail { flex: 1; }
+
+    .station-hero-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .station-hero-placeholder {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #e0e4ea, #c8cdd6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+    }
+
+    .station-detail-header {
+      padding: 20px 20px 12px;
+    }
+
+    .station-detail-code {
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .station-detail-name {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .station-detail-poem {
+      font-size: .88rem;
+      color: var(--text-light);
+      font-style: italic;
+      line-height: 1.7;
+      padding: 10px 14px;
+      background: #f8f9fb;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--accent);
+    }
+
+    /* ===========================
+       步驟解鎖系統
+    =========================== */
+    .steps-container {
+      padding: 16px 20px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .step-card {
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .step-card.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(230,0,18,.08);
+    }
+
+    .step-card.done {
+      border-color: var(--success);
+      background: #f0faf4;
+    }
+
+    .step-card.locked-step {
+      opacity: .5;
+      filter: grayscale(.5);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #fafbfc;
+    }
+
+    .step-card.active  .step-header { background: #fff5f5; }
+    .step-card.done    .step-header { background: #edfaf3; }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--text-light);
+      flex-shrink: 0;
+    }
+
+    .step-card.active .step-num {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .step-card.done .step-num {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .step-title {
+      font-size: .92rem;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .step-badge { flex-shrink: 0; }
+
+    .step-body {
+      padding: 16px 18px;
+    }
+
+    .step-question {
+      font-size: .92rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 14px;
+      background: #f8f9fb;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+    }
+
+    .step-photo-task {
+      font-size: .88rem;
+      color: var(--text-light);
+      line-height: 1.7;
+      padding: 10px 14px;
+      background: #fffbf0;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .password-reveal {
+      background: linear-gradient(135deg, #003087, #e60012);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      text-align: center;
+      margin-top: 14px;
+      animation: fadeInUp .4s ease;
+    }
+
+    .password-label {
+      font-size: .75rem;
+      opacity: .8;
+      margin-bottom: 4px;
+    }
+
+    .password-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+    }
+
+    /* ===========================
+       彈窗 Modal
+    =========================== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 999;
+      align-items: flex-end;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      animation: fadeIn .25s ease;
+    }
+
+    .modal-sheet {
+      background: #fff;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      padding: 24px 22px 36px;
+      width: 100%;
+      max-width: 480px;
+      animation: slideUp .3s cubic-bezier(.4,0,.2,1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+
+    .modal-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      margin: 0 auto 20px;
+    }
+
+    .modal-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    /* ===========================
+       Confetti 粒子
+    =========================== */
+    .confetti-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confettiFall linear forwards;
+    }
+    /* ===========================
+       證書頁樣式
+    =========================== */
+    .certificate-page {
+      background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 20px 60px;
+    }
+
+    .cert-title-top {
+      color: rgba(255,255,255,.7);
+      font-size: .85rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      animation: fadeInUp .5s ease;
+    }
+
+    .cert-card {
+      background: linear-gradient(145deg, #fff9f0, #fff);
+      border-radius: var(--radius-lg);
+      padding: 32px 26px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 12px 60px rgba(0,0,0,.4);
+      border: 3px solid var(--accent);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp .6s ease .1s both;
+    }
+
+    .cert-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(245,166,35,.07);
+    }
+
+    .cert-card::after {
+      content: '';
+      position: absolute;
+      bottom: -50px; left: -50px;
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      background: rgba(230,0,18,.05);
+    }
+
+    .cert-emblem {
+      text-align: center;
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+      animation: bounce 2s infinite;
+    }
+
+    .cert-header-text {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .cert-main-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: .06em;
+      margin-bottom: 4px;
+    }
+
+    .cert-sub-title {
+      font-size: .82rem;
+      color: var(--text-light);
+      letter-spacing: .08em;
+    }
+
+    .cert-divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      margin: 16px 0;
+    }
+
+    .cert-recipient-label {
+      font-size: .75rem;
+      color: var(--text-light);
+      text-align: center;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .cert-recipient-name {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--secondary);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .cert-group-name {
+      font-size: .9rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .cert-body-text {
+      font-size: .88rem;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.8;
+      margin-bottom: 18px;
+    }
+
+    .cert-stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .cert-stat {
+      text-align: center;
+    }
+
+    .cert-stat-num {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .cert-stat-label {
+      font-size: .72rem;
+      color: var(--text-light);
+    }
+
+    .cert-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-top: 18px;
+    }
+
+    .cert-date {
+      font-size: .75rem;
+      color: var(--text-light);
+    }
+
+    .cert-seal {
+      font-size: 2.4rem;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,.15));
+    }
+
+    .cert-signature {
+      font-size: .8rem;
+      color: var(--text-light);
+      text-align: right;
+    }
+
+    .cert-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 400px;
+      margin-top: 24px;
+      animation: fadeInUp .7s ease .2s both;
+    }
+
+    /* ===========================
+       載入動畫
+    =========================== */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,.92);
+      z-index: 9998;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    .loading-text {
+      font-size: .9rem;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    /* ===========================
+       Toast 通知
+    =========================== */
+    .toast-container {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: calc(100% - 32px);
+      max-width: 440px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: #2c3e50;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      font-size: .88rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      animation: fadeInUp .3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.toast-success { background: #1e8449; }
+    .toast.toast-error   { background: #c0392b; }
+    .toast.toast-info    { background: var(--secondary); }
+
+  </style>
+</head>
+<body>
+<div class="app-wrapper">
+
+  <!-- =====================
+       Toast 容器
+  ===================== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- =====================
+       Confetti 容器
+  ===================== -->
+  <div class="confetti-container" id="confettiContainer"></div>
+
+  <!-- =====================
+       載入遮罩
+  ===================== -->
+  <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">載入中，請稍候⋯</div>
+  </div>
+
+  <!-- =====================
+       頁面 1：登入頁
+  ===================== -->
+  <div class="page active" id="page-login">
+    <div class="login-page">
+      <div class="login-logo">🚇</div>
+      <div class="login-title">港鐵尋寶大冒險</div>
+      <div class="login-subtitle">2025 · 港島線 × 東鐵線</div>
+      <div class="login-card">
+        <div class="form-group">
+          <label class="form-label">👤 隊伍名稱</label>
+          <input class="form-input" type="text" id="teamNameInput"
+                 placeholder="請輸入你的隊伍名稱" maxlength="20" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">🗺️ 選擇路線</label>
+          <div class="group-selector">
+            <button class="group-btn" id="groupA" onclick="selectGroup('A')">
+              <span class="group-icon">🟢</span>
+              <span>港島線</span>
+              <span class="badge badge-red">A 組</span>
+            </button>
+            <button class="group-btn" id="groupB" onclick="selectGroup('B')">
+              <span class="group-icon">🔵</span>
+              <span>東鐵線</span>
+              <span class="badge badge-blue">B 組</span>
+            </button>
+          </div>
+        </div>
+        <div id="loginAlert"></div>
+        <button class="btn btn-primary" onclick="handleLogin()">
+          🚀 開始冒險
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================
+       頁面 2：主頁（站點列表）
+  ===================== -->
+  <div class="page" id="page-home">
+    <div class="top-bar">
+      <div class="logo-text">🚇 港鐵尋寶</div>
+      <div class="progress-text" id="homeProgressText">0 / 9 完成</div>
+    </div>
+    <div class="hero-banner">
+      <div class="hero-greeting" id="heroGreeting">你好，冒險者！</div>
+      <div class="hero-title" id="heroTitle">港鐵尋寶大冒險 2025</div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="statCompleted">0</div>
+          <div class="hero-stat-label">已完成</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="statRemaining">9</div>
+          <div class="hero-stat-label">剩餘</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="statGroup">-</div>
+          <div class="hero-stat-label">路線</div>
+        </div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-header">
+        <span class="progress-title">整體進度</span>
+        <span class="progress-pct" id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="station-list" id="stationList"></div>
+    <div class="footer">
+      <strong>港鐵尋寶大冒險 2025</strong><br>
+      港島線 × 東鐵線 · 2025年2月28日<br>
+      版權所有 © 2025
+    </div>
+  </div>
+
+  <!-- =====================
+       頁面 3：站點詳情頁
+  ===================== -->
+  <div class="page" id="page-station">
+    <div class="top-bar">
+      <button class="back-btn" onclick="goHome()">←</button>
+      <div class="logo-text" id="stationTopTitle">CP 站點</div>
+      <div class="progress-text" id="stationProgressText"></div>
+    </div>
+    <div class="station-detail" id="stationDetailContent"></div>
+    <div class="footer">
+      <strong>港鐵尋寶大冒險 2025</strong><br>
+      2025年2月28日 · 版權所有 © 2025
+    </div>
+  </div>
+
+  <!-- =====================
+       頁面 4：通關證書頁
+  ===================== -->
+  <div class="page" id="page-certificate">
+    <div class="certificate-page" id="certificateContent"></div>
+  </div>
+
+  <!-- =====================
+       通用 Modal
+  ===================== -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+    <div class="modal-sheet" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+  /* ===================================================
+     全域狀態
+  =================================================== */
+  const STATE = {
+    teamName:        '',
+    group:           '',       // 'A' | 'B'
+    currentStation:  0,        // 0-based index
+    stationProgress: [],       // 每關解鎖到哪一步 0=未開始 1=Step1通過 2=Step2通過 3=全通
+    totalStations:   9,
+  };
+
+  /* ===================================================
+     工具函式
+  =================================================== */
+
+  /** 頁面切換（含強制置頂） */
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /** Toast 通知 */
+  function showToast(msg, type = 'info', duration = 2800) {
+    const container = document.getElementById('toastContainer');
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+    const el = document.createElement('div');
+    el.className = `toast toast-${type}`;
+    el.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${msg}</span>`;
+    container.appendChild(el);
+    setTimeout(() => el.remove(), duration);
+  }
+
+  /** 載入遮罩 */
+  function showLoading(show) {
+    document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+  }
+
+  /** Modal */
+  function openModal(title, bodyHtml) {
+    document.getElementById('modalTitle').innerHTML = title;
+    document.getElementById('modalBody').innerHTML = bodyHtml;
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  /** Confetti 彩紙爆炸 */
+  function fireConfetti() {
+    const container = document.getElementById('confettiContainer');
+    const colors = ['#e60012','#003087','#f5a623','#27ae60','#9b59b6','#fff'];
+    for (let i = 0; i < 80; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = `
+        left: ${Math.random() * 100}%;
+        top: -10px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        width: ${6 + Math.random() * 8}px;
+        height: ${6 + Math.random() * 8}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        animation-duration: ${2 + Math.random() * 2.5}s;
+        animation-delay: ${Math.random() * 0.8}s;
+      `;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 5000);
+    }
+  }
+
+  /* ===================================================
+     高包容度答案驗證引擎
+  =================================================== */
+
+  /**
+   * normalise()：將使用者輸入標準化，移除所有干擾因素後比對
+   * - 轉小寫
+   * - 移除所有空白（全形/半形）
+   * - 移除常見標點符號（包括題號前綴如 "1." "2." "（一）" 等）
+   * - 移除貨幣符號
+   * - 移除全形括號
+   */
+  function normalise(str) {
+    if (!str) return '';
+    return str
+      .toLowerCase()
+      // 移除題號前綴 (1. 2. 一. 二. （1） （一） 等)
+      .replace(/[（(]\s*[\dA-Za-z一二三四五六七八九十]+\s*[）)]/g, '')
+      .replace(/^[\dA-Za-z一二三四五六七八九十]+\s*[\.。、：:]\s*/gm, '')
+      // 移除所有空白（半形與全形）
+      .replace(/[\s\u3000\u00a0]+/g, '')
+      // 移除標點符號
+      .replace(/[，,。\.、；;：:！!？?「」『』【】《》〈〉""''…—–\-_/\\|]/g, '')
+      // 移除貨幣符號
+      .replace(/[$＄￥£€]/g, '')
+      // 移除全形英數轉半形
+      .replace(/[Ａ-Ｚａ-ｚ０-９]/g, c =>
+        String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+  }
+
+  /**
+   * checkAnswer()：檢查使用者答案是否符合
+   * @param {string}   userInput  使用者輸入
+   * @param {string[]} ansList    接受的答案陣列
+   * @returns {boolean}
+   *
+   * 特殊規則：
+   * - ansList 為空陣列 [] 或包含 '*' → 任何非空輸入均接受
+   * - 否則逐一比對 normalise 後的字串，包含即算通過（substring match）
+   */
+  function checkAnswer(userInput, ansList) {
+    const trimmed = userInput.trim();
+    // 自由答案模式
+    if (!ansList || ansList.length === 0 || ansList.includes('*')) {
+      return trimmed.length > 0;
+    }
+    const norm = normalise(trimmed);
+    return ansList.some(ans => {
+      const normAns = normalise(ans);
+      // 雙向 substring match：使用者輸入包含答案 或 答案包含使用者輸入
+      return norm.includes(normAns) || normAns.includes(norm);
+    });
+  }
+
+  /* ===================================================
+     進度儲存與恢復（localStorage）
+  =================================================== */
+
+  function saveProgress() {
+    const data = {
+      teamName:        STATE.teamName,
+      group:           STATE.group,
+      currentStation:  STATE.currentStation,
+      stationProgress: STATE.stationProgress,
+    };
+    localStorage.setItem('mtrHunt2025_progress', JSON.stringify(data));
+    localStorage.setItem('mtrHunt2025_group',    STATE.group);
+  }
+
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem('mtrHunt2025_progress');
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearProgress() {
+    localStorage.removeItem('mtrHunt2025_progress');
+    localStorage.removeItem('mtrHunt2025_group');
+  }
+
+  /* ===================================================
+     分組選擇（登入頁）
+  =================================================== */
+  let selectedGroup = '';
+
+  function selectGroup(g) {
+    selectedGroup = g;
+    document.getElementById('groupA').classList.toggle('selected', g === 'A');
+    document.getElementById('groupB').classList.toggle('selected', g === 'B');
+  }
+
+  /* ===================================================
+     登入邏輯
+  =================================================== */
+  function handleLogin() {
+    const nameInput = document.getElementById('teamNameInput').value.trim();
+    const alertEl   = document.getElementById('loginAlert');
+
+    // 驗證輸入
+    if (!nameInput) {
+      alertEl.innerHTML = `<div class="alert alert-danger">⚠️ 請輸入隊伍名稱！</div>`;
+      document.getElementById('teamNameInput').classList.add('error');
+      return;
+    }
+    if (!selectedGroup) {
+      alertEl.innerHTML = `<div class="alert alert-danger">⚠️ 請選擇路線（港島線 A 組 或 東鐵線 B 組）！</div>`;
+      return;
+    }
+
+    // 清除錯誤
+    alertEl.innerHTML = '';
+    document.getElementById('teamNameInput').classList.remove('error');
+
+    // 檢查是否有已儲存進度
+    const saved = loadProgress();
+    if (saved && saved.group === selectedGroup && saved.teamName === nameInput) {
+      // 恢復進度
+      STATE.teamName        = saved.teamName;
+      STATE.group           = saved.group;
+      STATE.currentStation  = saved.currentStation;
+      STATE.stationProgress = saved.stationProgress;
+      showToast(`🎉 已恢復「${nameInput}」的進度！`, 'success');
+      showLoading(true);
+      setTimeout(() => {
+        showLoading(false);
+        renderHome();
+        showPage('home');
+      }, 1200);
+    } else {
+      // 全新開始
+      STATE.teamName        = nameInput;
+      STATE.group           = selectedGroup;
+      STATE.currentStation  = 0;
+      STATE.stationProgress = new Array(STATE.totalStations).fill(0);
+      saveProgress();
+      showLoading(true);
+      setTimeout(() => {
+        showLoading(false);
+        renderHome();
+        showPage('home');
+      }, 1000);
+    }
+  }
+
+  /* ===================================================
+     返回首頁
+  =================================================== */
+  function goHome() {
+    renderHome();
+    showPage('home');
+  }
+
+  /* ===================================================
+     取得當前路線的站點資料
+  =================================================== */
+  function getStations() {
+    return STATE.group === 'A' ? STATIONS_A : STATIONS_B;
+  }
+
+  /* ===================================================
+     渲染首頁
+  =================================================== */
+  function renderHome() {
+    const stations = getStations();
+    const completed = STATE.stationProgress.filter(p => p >= 3).length;
+    const remaining = STATE.totalStations - completed;
+    const pct       = Math.round((completed / STATE.totalStations) * 100);
+
+    // Hero 區域
+    document.getElementById('heroGreeting').textContent =
+      `你好，${STATE.teamName}！`;
+    document.getElementById('heroTitle').textContent =
+      STATE.group === 'A' ? '🟢 港島線 A 組冒險' : '🔵 東鐵線 B 組冒險';
+    document.getElementById('statCompleted').textContent = completed;
+    document.getElementById('statRemaining').textContent = remaining;
+    document.getElementById('statGroup').textContent =
+      STATE.group === 'A' ? 'A 組' : 'B 組';
+
+    // 進度條
+    document.getElementById('progressPct').textContent     = pct + '%';
+    document.getElementById('progressBarFill').style.width = pct + '%';
+    document.getElementById('homeProgressText').textContent =
+      `${completed} / ${STATE.totalStations} 完成`;
+
+    // 站點列表
+    const listEl = document.getElementById('stationList');
+    listEl.innerHTML = '';
+
+    const groupLabel = document.createElement('div');
+    groupLabel.className = 'section-title';
+    groupLabel.textContent =
+      STATE.group === 'A' ? '🟢 港島線 A 組 — 9 個 CP' : '🔵 東鐵線 B 組 — 9 個 CP';
+    listEl.appendChild(groupLabel);
+
+    stations.forEach((st, idx) => {
+      const prog    = STATE.stationProgress[idx] || 0;
+      const isFirst = idx === 0;
+      // 解鎖條件：第一關永遠解鎖，其餘需前一關完成（prog[idx-1] >= 3）
+      const prevDone = idx === 0 || (STATE.stationProgress[idx - 1] >= 3);
+      const isDone   = prog >= 3;
+      const isUnlocked = prevDone && !isDone;
+      const isLocked   = !prevDone && !isDone;
+
+      let statusClass = '';
+      let statusIcon  = '';
+      if (isDone)      { statusClass = 'completed'; statusIcon = '✅'; }
+      else if (isUnlocked) { statusClass = 'unlocked'; statusIcon = '▶️'; }
+      else             { statusClass = 'locked';    statusIcon = '🔒'; }
+
+      const card = document.createElement('div');
+      card.className = `station-card ${statusClass} animate-fadeIn`;
+      card.style.animationDelay = `${idx * 0.05}s`;
+
+      const thumbHtml = st.imgUrl
+        ? `<img class="station-thumb" src="${st.imgUrl}" alt="${st.imgAlt || st.name}" onerror="this.style.display='none'" />`
+        : `<div class="station-thumb-placeholder">🚉</div>`;
+
+      card.innerHTML = `
+        ${thumbHtml}
+        <div class="station-info">
+          <div class="station-code">${st.code}</div>
+          <div class="station-name">${st.name}</div>
+          <div class="station-poem">${st.poem}</div>
+        </div>
+        <div class="station-status-icon">${statusIcon}</div>
+      `;
+
+      if (isUnlocked) {
+        card.onclick = () => {
+          STATE.currentStation = idx;
+          renderStationDetail(idx);
+          showPage('station');
+        };
+      }
+
+      listEl.appendChild(card);
+    });
+
+    // 所有關卡完成 → 顯示前往證書按鈕
+    if (completed === STATE.totalStations) {
+      const certBtn = document.createElement('button');
+      certBtn.className = 'btn btn-success animate-pulse';
+      certBtn.style.margin = '16px 4px';
+      certBtn.innerHTML = '🏆 領取通關證書！';
+      certBtn.onclick = renderCertificate;
+      listEl.appendChild(certBtn);
+    }
+  }
+</script>
+<script>
+  /* ===================================================
+     渲染站點詳情頁
+  =================================================== */
+  function renderStationDetail(idx) {
+    const stations = getStations();
+    const st       = stations[idx];
+    const prog     = STATE.stationProgress[idx] || 0;
+
+    // 強制置頂
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 更新頂部導航
+    document.getElementById('stationTopTitle').textContent = st.code + ' ' + st.name;
+    document.getElementById('stationProgressText').textContent =
+      `${idx + 1} / ${STATE.totalStations}`;
+
+    const container = document.getElementById('stationDetailContent');
+
+    // 封面圖片
+    const heroHtml = st.imgUrl
+      ? `<img class="station-hero-img" src="${st.imgUrl}"
+             alt="${st.imgAlt || st.name}"
+             onerror="this.outerHTML='<div class=\'station-hero-placeholder\'>🚉</div>'" />`
+      : `<div class="station-hero-placeholder">🚉</div>`;
+
+    // 站點頭部資訊
+    const headerHtml = `
+      <div class="station-detail-header">
+        <div class="station-detail-code">${st.code}</div>
+        <div class="station-detail-name">${st.name}</div>
+        <div class="station-detail-poem">${st.poem}</div>
+      </div>
+    `;
+
+    // 生成三個步驟卡片
+    const stepsHtml = buildStepsHtml(st, prog, idx);
+
+    container.innerHTML = heroHtml + headerHtml +
+      `<div class="steps-container">${stepsHtml}</div>`;
+  }
+
+  /* ===================================================
+     建構三步驟 HTML
+  =================================================== */
+  function buildStepsHtml(st, prog, idx) {
+    let html = '';
+
+    /* ---------- Step 1：引子問題 ---------- */
+    const s1State = prog >= 1 ? 'done' : 'active';
+    const s1Body  = prog >= 1
+      ? `<div class="alert alert-success">✅ 引子問題已解鎖！繼續前往通關任務。</div>`
+      : `
+        <div class="step-question">❓ ${st.step1Question}</div>
+        <div class="form-group">
+          <label class="form-label">📝 你的答案</label>
+          <input class="form-input" type="text" id="s1input"
+                 placeholder="輸入答案後按提交…" />
+        </div>
+        <div id="s1alert"></div>
+        <button class="btn btn-primary" onclick="submitStep1(${idx})">
+          🔓 提交引子答案
+        </button>
+      `;
+
+    html += `
+      <div class="step-card ${s1State}" id="stepCard1">
+        <div class="step-header">
+          <div class="step-num">${prog >= 1 ? '✓' : '1'}</div>
+          <div class="step-title">🔑 Step 1 — 引子問題</div>
+          <div class="step-badge">
+            <span class="badge ${prog >= 1 ? 'badge-green' : 'badge-red'}">
+              ${prog >= 1 ? '已解鎖' : '進行中'}
+            </span>
+          </div>
+        </div>
+        <div class="step-body">${s1Body}</div>
+      </div>
+    `;
+
+    /* ---------- Step 2：通關任務 ---------- */
+    const s2State = prog >= 2 ? 'done' : prog >= 1 ? 'active' : 'locked-step';
+    const s2Body  = prog < 1
+      ? `<div class="alert alert-info">🔒 請先完成引子問題才能解鎖此步驟。</div>`
+      : prog >= 2
+        ? `<div class="alert alert-success">✅ 通關任務已完成！前往拍照任務。</div>`
+        : `
+          <div class="step-question">📋 ${st.step2Task}</div>
+          <div class="form-group">
+            <label class="form-label">📝 你的答案</label>
+            <input class="form-input" type="text" id="s2input"
+                   placeholder="輸入通關任務答案…" />
+          </div>
+          <div id="s2alert"></div>
+          <button class="btn btn-secondary" onclick="submitStep2(${idx})">
+            🔓 提交通關答案
+          </button>
+        `;
+
+    html += `
+      <div class="step-card ${s2State}" id="stepCard2">
+        <div class="step-header">
+          <div class="step-num">${prog >= 2 ? '✓' : '2'}</div>
+          <div class="step-title">🎯 Step 2 — 通關任務</div>
+          <div class="step-badge">
+            <span class="badge ${prog >= 2 ? 'badge-green' : prog >= 1 ? 'badge-blue' : 'badge-grey'}">
+              ${prog >= 2 ? '已完成' : prog >= 1 ? '進行中' : '未解鎖'}
+            </span>
+          </div>
+        </div>
+        <div class="step-body">${s2Body}</div>
+      </div>
+    `;
+
+    /* ---------- Step 3：拍照任務 + 通關密語 ---------- */
+    const s3State = prog >= 3 ? 'done' : prog >= 2 ? 'active' : 'locked-step';
+    const s3Body  = prog < 2
+      ? `<div class="alert alert-info">🔒 請先完成通關任務才能解鎖此步驟。</div>`
+      : prog >= 3
+        ? `
+          <div class="alert alert-success">🎉 本關全部完成！</div>
+          <div class="password-reveal">
+            <div class="password-label">🗝️ 本關通關密語</div>
+            <div class="password-value">${st.password}</div>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-success" onclick="proceedNext(${idx})">
+              ➡️ 前往下一關
+            </button>
+          </div>
+        `
+        : `
+          <div class="step-photo-task">📸 拍照任務：${st.step3Photo}</div>
+          <div class="alert alert-warning" style="margin-bottom:14px;">
+            完成拍照後，按下方按鈕解鎖本關通關密語。
+          </div>
+          <div id="s3alert"></div>
+          <button class="btn btn-success" onclick="submitStep3(${idx})">
+            📷 已完成拍照，解鎖密語！
+          </button>
+        `;
+
+    html += `
+      <div class="step-card ${s3State}" id="stepCard3">
+        <div class="step-header">
+          <div class="step-num">${prog >= 3 ? '✓' : '3'}</div>
+          <div class="step-title">📸 Step 3 — 拍照任務</div>
+          <div class="step-badge">
+            <span class="badge ${prog >= 3 ? 'badge-green' : prog >= 2 ? 'badge-gold' : 'badge-grey'}">
+              ${prog >= 3 ? '已完成' : prog >= 2 ? '進行中' : '未解鎖'}
+            </span>
+          </div>
+        </div>
+        <div class="step-body">${s3Body}</div>
+      </div>
+    `;
+
+    return html;
+  }
+
+  /* ===================================================
+     Step 1 提交（引子問題）
+  =================================================== */
+  function submitStep1(idx) {
+    const stations = getStations();
+    const st       = stations[idx];
+    const input    = document.getElementById('s1input');
+    const alertEl  = document.getElementById('s1alert');
+
+    if (!input) return;
+    const val = input.value.trim();
+
+    if (!val) {
+      alertEl.innerHTML = `<div class="alert alert-danger">⚠️ 請先輸入答案！</div>`;
+      input.classList.add('error');
+      return;
+    }
+
+    if (checkAnswer(val, st.step1Ans)) {
+      // 答案正確
+      input.classList.remove('error');
+      input.classList.add('success');
+      alertEl.innerHTML = `<div class="alert alert-success">✅ 正確！引子問題已解鎖，繼續下一步！</div>`;
+      STATE.stationProgress[idx] = 1;
+      saveProgress();
+      // 短暫延遲後重新渲染，並置頂
+      setTimeout(() => {
+        renderStationDetail(idx);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 900);
+    } else {
+      // 答案錯誤
+      input.classList.add('error');
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ 答案不對，再想想看！</div>`;
+      // 輕微震動提示（若設備支援）
+      if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+    }
+  }
+
+  /* ===================================================
+     Step 2 提交（通關任務）
+  =================================================== */
+  function submitStep2(idx) {
+    const stations = getStations();
+    const st       = stations[idx];
+    const input    = document.getElementById('s2input');
+    const alertEl  = document.getElementById('s2alert');
+
+    if (!input) return;
+    const val = input.value.trim();
+
+    if (!val) {
+      alertEl.innerHTML = `<div class="alert alert-danger">⚠️ 請先輸入答案！</div>`;
+      input.classList.add('error');
+      return;
+    }
+
+    if (checkAnswer(val, st.step2Ans)) {
+      input.classList.remove('error');
+      input.classList.add('success');
+      alertEl.innerHTML = `<div class="alert alert-success">✅ 出色！通關任務完成，解鎖拍照任務！</div>`;
+      STATE.stationProgress[idx] = 2;
+      saveProgress();
+      setTimeout(() => {
+        renderStationDetail(idx);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 900);
+    } else {
+      input.classList.add('error');
+      alertEl.innerHTML = `<div class="alert alert-danger">❌ 答案不對，再試一次！</div>`;
+      if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+    }
+  }
+
+  /* ===================================================
+     Step 3 提交（拍照任務 — 直接通過）
+  =================================================== */
+  function submitStep3(idx) {
+    STATE.stationProgress[idx] = 3;
+    saveProgress();
+    fireConfetti();
+    showToast('🎉 恭喜完成本關！通關密語已解鎖！', 'success', 3000);
+    setTimeout(() => {
+      renderStationDetail(idx);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 600);
+  }
+
+  /* ===================================================
+     前往下一關
+  =================================================== */
+  function proceedNext(idx) {
+    const nextIdx = idx + 1;
+    // 強制置頂
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (nextIdx >= STATE.totalStations) {
+      // 全部完成 → 顯示證書
+      showToast('🏆 所有關卡完成！領取你的通關證書！', 'success', 3000);
+      fireConfetti();
+      setTimeout(() => {
+        renderCertificate();
+        showPage('certificate');
+      }, 800);
+    } else {
+      // 前往下一關
+      STATE.currentStation = nextIdx;
+      showToast(`➡️ 前往 ${getStations()[nextIdx].code}！`, 'info', 2000);
+      saveProgress();
+      setTimeout(() => {
+        renderStationDetail(nextIdx);
+        showPage('station');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 500);
+    }
+  }
+
+  /* ===================================================
+     渲染通關證書
+  =================================================== */
+  function renderCertificate() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    fireConfetti();
+
+    const groupName = STATE.group === 'A' ? '港島線 A 組' : '東鐵線 B 組';
+    const completed = STATE.stationProgress.filter(p => p >= 3).length;
+
+    const html = `
+      <div class="cert-title-top">🏅 通關證書</div>
+      <div class="cert-card">
+        <div class="cert-emblem">🏆</div>
+        <div class="cert-header-text">
+          <div class="cert-main-title">港鐵尋寶大冒險 2025</div>
+          <div class="cert-sub-title">MTR TREASURE HUNT 2025</div>
+        </div>
+        <div class="cert-divider"></div>
+        <div class="cert-recipient-label">頒發給</div>
+        <div class="cert-recipient-name">${STATE.teamName}</div>
+        <div class="cert-group-name">${groupName}</div>
+        <div class="cert-body-text">
+          恭喜閣下成功完成<br>
+          <strong>港鐵尋寶大冒險 2025</strong><br>
+          沿途探索香港歷史與文化地標<br>
+          展現團隊精神，勇闖所有關卡！
+        </div>
+        <div class="cert-divider"></div>
+        <div class="cert-stats-row">
+          <div class="cert-stat">
+            <div class="cert-stat-num">${completed}</div>
+            <div class="cert-stat-label">完成關卡</div>
+          </div>
+          <div class="cert-stat">
+            <div class="cert-stat-num">9</div>
+            <div class="cert-stat-label">總關卡數</div>
+          </div>
+          <div class="cert-stat">
+            <div class="cert-stat-num">100%</div>
+            <div class="cert-stat-label">完成率</div>
+          </div>
+        </div>
+        <div class="cert-divider"></div>
+        <div class="cert-footer">
+          <div>
+            <div class="cert-date">日期：2025年2月28日</div>
+            <div class="cert-signature">港鐵尋寶大冒險<br>活動籌委會</div>
+          </div>
+          <div class="cert-seal">🎖️</div>
+        </div>
+      </div>
+      <div class="cert-actions">
+        <button class="btn btn-primary" onclick="goHome()">
+          🏠 返回主頁
+        </button>
+        <button class="btn btn-ghost" onclick="clearProgress(); showPage('login');">
+          🔄 重新開始
+        </button>
+      </div>
+    `;
+
+    document.getElementById('certificateContent').innerHTML = html;
+    showPage('certificate');
+  }
+</script>
+<script>
+  /* ===================================================
+     A 組 — 港島線站點數據（A1–A5）
+  =================================================== */
+  const STATIONS_A = [
+
+    /* -------- A1：筲箕灣避風塘 -------- */
+    {
+      code:          'A1',
+      name:          '筲箕灣避風塘',
+      imgUrl:        'images/a1.jpg',
+      imgAlt:        '📷 筲箕灣避風塘：漁船與艇屋林立的香港傳統漁港',
+      poem:          '避風塘內船隱藏，海邊舊日訴漁故事。',
+
+      // Step 1：引子問題
+      step1Question: '請前往筲箕灣巴士總站，站在巴士站牌一側（以指定圖片視角為準），由右至左數站牌，由右起第四個巴士總站，記錄該路線的巴士號碼及終點站名稱。（請同時填寫號碼及終點站，例：1A 銅鑼灣）',
+      step1Ans:      ['608九龍城', '608 九龍城', '608,九龍城',
+                      '1.608 2.九龍城', '1608 2九龍城',
+                      '號碼608 終點九龍城', '608', '九龍城'],
+
+      // Step 2：通關任務
+      step2Task:     '沿海濱長廊步行至筲箕灣避風塘，尋找介紹筲箕灣及鰂魚涌的資訊牌，並填寫以下句子的空格：「太古洋行早於一八八四年已在鰂魚涌設立糖廠，一九零七年更建成太古 ______，並興建職工宿舍，促進了此區的發展。」',
+      step2Ans:      ['船塢', '太古船塢', '太古船塢.'],
+
+      // Step 3：拍照任務
+      step3Photo:    '全組以最具個性的漁船或艇屋為背景，擺出「發現海寶」姿勢拍攝合照。',
+      password:      'HarbourHunt',
+    },
+
+    /* -------- A2：愛秩序灣公園 -------- */
+    {
+      code:          'A2',
+      name:          '愛秩序灣公園',
+      imgUrl:        'images/a2.jpg',
+      imgAlt:        '📷 愛秩序灣公園：漁村主題裝置與1:1比例漁船模型',
+      poem:          '避風塘外浪聲遠，愛秩序灣藏漁村夢。',
+
+      step1Question: '離開前，用一分鐘的時間，觀察海面及岸邊，記錄目前停泊在港內的漁船／艇屋總數量。（以實際數字作答，任何合理數目均接受）',
+      step1Ans:      ['*'],
+
+      step2Task:     '前往愛秩序灣公園，尋找 1:1 比例的漁船模型：\n1. 觀察模型旁水池內的船隻總數（包括大漁船及小艇），記錄數量。\n2. 記錄該裝置主要使用的材質（例如：木、金屬等）。',
+      step2Ans:      ['3', '3艘', '三', '三艘',
+                      '木', '木材', '木頭',
+                      '3艘木', '3木', '三艘木'],
+
+      step3Photo:    '全組在漁村主題裝置旁，擺出「漁村時光」姿勢拍攝合照。',
+      password:      'FishingDream',
+    },
+
+    /* -------- A3：太安樓 -------- */
+    {
+      code:          'A3',
+      name:          '太安樓',
+      imgUrl:        'images/a3.jpg',
+      imgAlt:        '📷 太安樓：香港東區地道小食集中地',
+      poem:          '舊樓商場藏小食林，地道味道守東區。',
+
+      step1Question: '請前往座標 22.280434, 114.224413 附近的電車站。假設乘坐往上環方向的電車，請寫出：由本站開始，往上環方向的「第五個」電車站名稱（英文站名）。',
+      step1Ans:      ['船塢里', 'shipyardlane', 'shipyard lane',
+                      'shipyard', '船塢'],
+
+      step2Task:     '在太安樓小食世界內，尋找指定店舖「○○小食」，並記錄：\n1. 店舖中文招牌的總字數；\n2. 店名最後一個中文字。',
+      step2Ans:      ['4', '四', '4個', '四個',
+                      '食', '阿明小食', '4食',
+                      '1.4 2.食', '14', '四食'],
+
+      step3Photo:    '全組在該小食店前，手持或模擬手持小食，擺出「品嚐隱藏寶」姿勢拍攝合照。',
+      password:      'SnackTreasure',
+    },
+
+    /* -------- A4：太古公園 -------- */
+    {
+      code:          'A4',
+      name:          '太古公園',
+      imgUrl:        'images/a4.jpg',
+      imgAlt:        '📷 太古公園：太古城中心旁的隱藏綠洲',
+      poem:          '太古城中綠意寶，隱藏公園守寧靜。',
+
+      step1Question: '請在地圖上找出最近的太古公園入口，並估計：由目前位置（地鐵站出閘位置）步行至該公園入口大約需要多少分鐘，寫下預計時間。',
+      step1Ans:      ['5', '6', '7', '8', '9', '10',
+                      '5分鐘', '6分鐘', '7分鐘', '8分鐘',
+                      '9分鐘', '10分鐘',
+                      '5-10', '5至10', '5到10',
+                      '5–10分鐘', '約5', '約10'],
+
+      step2Task:     '在太古公園內，選擇一個可安全躺下且不阻礙他人的公共設施或位置（例如長椅、平台、已鋪地墊的草地）：全組需在該位置躺下連續 5 分鐘，其間只可輕聲交談，或靜靜聆聽周圍聲音（如風聲、人聲、鳥聲等）。完成後按提交。',
+      step2Ans:      ['*'],
+
+      step3Photo:    '5 分鐘完成後，全組在原位置或附近，以「躺平也算努力」姿勢拍攝合照。',
+      password:      'RelaxEffort',
+    },
+
+    /* -------- A5：健康邨遊樂場 -------- */
+    {
+      code:          'A5',
+      name:          '健康邨遊樂場',
+      imgUrl:        'images/a5.jpg',
+      imgAlt:        '📷 健康邨遊樂場：北角社區中充滿童趣的遊樂設施',
+      poem:          '七姊妹道藏童趣，社區角落有遊樂寶。',
+
+      step1Question: '關於「七姊妹道」地名最常見的民間傳說，請選擇最符合的一項（單選）：\nA. 七位慈善家在此設立孤兒院，後人為紀念而命名；\nB. 七位情同手足的漁家姐妹為逃婚投海殉節而得名；\nC. 七位修女在此建立天主教學校而得名；\nD. 七位本地女商人在此合資開辦工廠而聞名。',
+      step1Ans:      ['b', 'b.', '選b', '答b',
+                      '七位情同手足', '漁家姐妹', '逃婚投海',
+                      'b七位情同手足的漁家姐妹為逃婚投海殉節而得名'],
+
+      step2Task:     '在健康邨遊樂場內，請到達相片中的位置，全員拿着手機擺出朝拍照者，做出拍照的動作。完成後按提交。',
+      step2Ans:      ['*'],
+
+      step3Photo:    '全組在該遊樂設施旁，擺出「童心全開」姿勢拍攝合照。',
+      password:      'ChildhoodJoy',
+    },
+
+  ]; // STATIONS_A 前半段結束（A1–A5）
+</script>
+<script>
+  /* ===================================================
+     A 組 — 港島線站點數據（A6–A9）
+     續接 STATIONS_A 陣列
+  =================================================== */
+  STATIONS_A.push(
+
+    /* -------- A6：油街實現 -------- */
+    {
+      code:          'A6',
+      name:          '油街實現',
+      imgUrl:        'images/a6.jpg',
+      imgAlt:        '📷 油街實現：北角舊皇家遊艇會所活化成的當代藝術空間',
+      poem:          '舊倉庫變身藝術寶庫，油街隱藏創意靈魂。',
+
+      step1Question: '在北角海濱花園臨海欄杆，請找到以下圖片的對應位置並回答：該位置的北方是什麼？',
+      step1Ans:      ['啟德', '啟德機場', '啟德發展區',
+                      'kaitak', 'kai tak',
+                      '啟德區', '舊啟德'],
+
+      step2Task:     '在油街實現室外，尋找指定的公共藝術作品，回答展品的設計師是誰。',
+      step2Ans:      ['伊藤彥子', '陳彥',
+                      'hikokoito', 'hikokochan',
+                      'hikoko', 'ito', 'chan',
+                      '伊藤', '彥子'],
+
+      step3Photo:    '全組在該作品前，擺出「藝術尋寶」姿勢拍攝合照。',
+      password:      'ArtQuest',
+    },
+
+    /* -------- A7：維多利亞公園 -------- */
+    {
+      code:          'A7',
+      name:          '維多利亞公園',
+      imgUrl:        'images/a7.jpg',
+      imgAlt:        '📷 維多利亞公園：銅鑼灣市中心最大綠肺與維多利亞女王像',
+      poem:          '維多利亞守鬧市，綠蔭小徑藏寧靜。',
+
+      step1Question: '在維多利亞公園外圍，找到一棵樹根明顯伸出地面的老樹，記錄該樹旁最近的一支燈柱編號。',
+      step1Ans:      ['43780', '43780號', '燈柱43780',
+                      'lamp43780', '43780燈柱'],
+
+      step2Task:     '在維多利亞公園的維多利亞像後有若干棵整齊排列的樹，請回答樹的品種及數量。（格式例：蘋果樹85）',
+      step2Ans:      ['棕櫚樹30', '棕櫚樹 30',
+                      '棕櫚30', '30棕櫚樹',
+                      '30棕櫚', '棕櫚', '30',
+                      '三十', '三十棵棕櫚樹',
+                      'palmtree30', 'palm30'],
+
+      step3Photo:    '全組在噴水池前，擺出「噴泉許願」姿勢拍攝合照。',
+      password:      'FountainWish',
+    },
+
+    /* -------- A8：天后後巷 -------- */
+    {
+      code:          'A8',
+      name:          '天后後巷',
+      imgUrl:        'images/a8.jpg',
+      imgAlt:        '📷 天后後巷：大坑蓮花宮附近充滿歷史感的舊區後巷',
+      poem:          '大坑蓮花守舊村，女神靈氣藏火龍。',
+
+      step1Question: '在蓮花宮外，有數則對聯，請回答（面向蓮花宮方向）右手邊對聯。',
+      step1Ans:      ['開窗臨海面閉月到龍洲',
+                      '開窗臨海面', '閉月到龍洲',
+                      '開窗臨海面，閉月到龍洲',
+                      '開窗臨海面,閉月到龍洲',
+                      '開窗臨海', '臨海面', '龍洲'],
+
+      step2Task:     '前往聖公會聖瑪利亞堂（由建築師周耀年及李禮之設計，於 1937 年落成），在教堂外觀指定位置停留，觀察建築細節，回答以下問題：聖公會聖馬利亞堂是香港聖公會在港島東區發展的「第一所」教會，常被形容為_______。（提示：四字詞）',
+      step2Ans:      ['山上之城',
+                      '山上之城.',
+                      'cityonahill',
+                      'city on a hill',
+                      '山上', '之城'],
+
+      step3Photo:    '全組在教堂門口或外牆前，擺出「守護歷史」姿勢拍攝合照。',
+      password:      'HistoryGuard',
+    },
+
+    /* -------- A9：灣仔利東街+泰源街 -------- */
+    {
+      code:          'A9',
+      name:          '灣仔利東街+泰源街',
+      imgUrl:        'images/a9.jpg',
+      imgAlt:        '📷 灣仔利東街：紅燈籠高掛的打卡熱點與泰源街復古玩具店',
+      poem:          '婚卡舊街重生地，舊樓新貌藏故事。灣仔巷弄藏童趣，舊店堆滿復古寶。',
+
+      step1Question: '在利東街指定路段（起點與終點將預先標示），向上望並數算頭頂懸掛的紅色燈籠總數，記錄實際數目。',
+      step1Ans:      ['300', '300個', '三百', '三百個',
+                      '約300', '大約300', '300盞',
+                      '三百盞', '300燈籠'],
+
+      step2Task:     '以下圖片的物件的價格為？',
+      step2Ans:      ['69', '$69', '69元', '69蚊',
+                      '港幣69', 'hkd69',
+                      '六十九', '六十九元', '六十九蚊'],
+
+      step3Photo:    '全組在天花掛滿玩具的走廊或店門前，擺出「童年尋寶」姿勢拍攝合照。',
+      password:      'ToyHunt',
+    }
+
+  ); // STATIONS_A.push 結束（A6–A9）
+</script>
+<script>
+  /* ===================================================
+     B 組 — 東鐵線站點數據（B1–B5）
+  =================================================== */
+  const STATIONS_B = [
+
+    /* -------- B1：粉嶺圍 -------- */
+    {
+      code:          'B1',
+      name:          '粉嶺圍',
+      imgUrl:        'images/b1.jpg',
+      imgAlt:        '📷 粉嶺圍：新界原居民傳統圍村門樓與石獅',
+      poem:          '上水古道連粉嶺，圍村門樓守歲月。',
+
+      step1Question: '在上水站若要前往北區公園，應從哪個出口離開？',
+      step1Ans:      ['b2', 'b2出口', '出口b2',
+                      'exitb2', 'b 2',
+                      'b', '出口b'],
+
+      step2Task:     '搭乘東鐵線由上水前往粉嶺，下車後步行至北區公園旁的粉嶺圍入口，全組在門樓附近與石獅或最顯眼標誌合照一張，擺出「古村守護」姿勢。完成後按提交。',
+      step2Ans:      ['*'],
+
+      step3Photo:    '全組在門樓附近與石獅或最顯眼標誌合照一張，擺出「古村守護」姿勢。',
+      password:      'AncientGuard',
+    },
+
+    /* -------- B2：香港鐵路博物館 -------- */
+    {
+      code:          'B2',
+      name:          '香港鐵路博物館',
+      imgUrl:        'images/b2.jpg',
+      imgAlt:        '📷 香港鐵路博物館：大埔墟站舊址保存的珍貴火車車卡',
+      poem:          '太和鐵軌藏舊時光，博物館中聽火車鳴。',
+
+      step1Question: '太和站的兩個出口 A 及 B，哪一個出口比較「寒」？（提示：與冷氣相關的幽默解釋）',
+      step1Ans:      ['b', 'b出口', '出口b',
+                      'exitb', 'b較寒', 'b寒',
+                      '出口b較寒', 'b比較寒'],
+
+      step2Task:     '在香港鐵路博物館內，展示了各式各樣的火車車卡，請將車卡的編號記錄下所有數值的總和。',
+      step2Ans:      ['1264', '一二六四',
+                      '1264號', '總和1264',
+                      '合計1264', '共1264'],
+
+      step3Photo:    '全組在所選火車車卡前，擺出「鐵路時光旅行」姿勢拍攝合照。',
+      password:      'RailJourney',
+    },
+
+    /* -------- B3：大埔藝術中心 -------- */
+    {
+      code:          'B3',
+      name:          '大埔藝術中心',
+      imgUrl:        'images/b3.jpg',
+      imgAlt:        '📷 大埔藝術中心：大埔元洲仔Island House百年殖民地建築',
+      poem:          '太和橋畔古宅靜，Island House 訴百年事。',
+
+      step1Question: '站在太和橋上，填充以下空格。大埔林村河上的太和橋，屬於1984–1992年間興建的一批林村河行人橋之一，與錦石橋、錦和橋、廣福「新」行人橋、_______同屬較新的行人天橋系統。',
+      step1Ans:      ['寶鄉橋', '寶鄉',
+                      '寶鄉橋.',
+                      'pouheungbridge',
+                      'pou heung bridge'],
+
+      step2Task:     '步行前往 Island House（大埔文物館）：下列哪一項最全面地說明港英政府在十九世紀末選址大埔元洲仔興建新界理民官／政務司官邸時，所考慮的交通與管治優勢？\nA. 毗鄰大埔墟市場，方便官員採購日用品及收集民情；\nB. 位處吐露港出入要道，可監察水陸交通，有利管治新界各區；\nC. 鄰近粉嶺警署，便於軍警聯合行動及維持治安；\nD. 地處山丘高地，氣候涼爽，是英國官員的傳統避暑勝地。',
+      step2Ans:      ['b', 'b.', '選b', '答b',
+                      'b位處吐露港',
+                      '吐露港', '監察水陸交通',
+                      '水陸交通', '管治新界'],
+
+      step3Photo:    '全組在 Island House 建築外牆或正門前，擺出「歷史守望」姿勢拍攝合照。',
+      password:      'HeritageWatch',
+    },
+
+    /* -------- B4：寶湖花園嘉利美食 -------- */
+    {
+      code:          'B4',
+      name:          '寶湖花園嘉利美食',
+      imgUrl:        'images/b4.jpg',
+      imgAlt:        '📷 寶湖花園：大埔區本地街坊美食集中地嘉利美食',
+      poem:          '街心海豚躍碧波，寶湖小食暖人心。',
+
+      step1Question: '在指定街心公園內，找到海豚主題的遊樂設備，記錄該設備主要的顏色。（可用簡短顏色描述）',
+      step1Ans:      ['紅', '紅色', 'red',
+                      '紅色為主', '主要紅色',
+                      '紅色海豚', '海豚紅色'],
+
+      step2Task:     '前往寶湖花園商場內的「嘉利美食」，全隊需購買至少一份小食，並由隊員共同分享。完成後按提交。',
+      step2Ans:      ['*'],
+
+      step3Photo:    '全組在嘉利美食店前，手持或展示小食，擺出「美食分享樂」姿勢拍攝合照。',
+      password:      'FoodShare',
+    },
+
+    /* -------- B5：曾大屋 -------- */
+    {
+      code:          'B5',
+      name:          '曾大屋',
+      imgUrl:        'images/b5.jpg',
+      imgAlt:        '📷 曾大屋：沙田城門河畔保存完好的清代客家圍屋',
+      poem:          '城門河畔公園綠，曾大屋中傳石匠魂。',
+
+      step1Question: '沙田公園在正式命名為「沙田公園」之前，曾使用哪一個名稱？\nA. 沙田海濱公園；\nB. 沙田中央公園；\nC. 沙田城門河公園；\nD. 沙田新市鎮公園。',
+      step1Ans:      ['b', 'b.', '選b', '答b',
+                      '沙田中央公園',
+                      'b沙田中央公園',
+                      '中央公園'],
+
+      step2Task:     '下列哪一項最切合歷史記載，說明曾大屋開村始祖曾貫萬「致富之道」的性質？\nA. 曾貫萬憑藉經營跨境貿易，往來廣州與香港之間販賣布匹而致富；\nB. 曾貫萬透過向港英政府承辦土地測量工程，獲得豐厚報酬而致富；\nC. 曾貫萬於興建香港大會堂期間擔任石材承辦商，藉承包工程而致富；\nD. 曾貫萬在九龍城寨附近開設典當行，以放債及典當業務積累財富。',
+      step2Ans:      ['c', 'c.', '選c', '答c',
+                      '石材承辦商',
+                      'c曾貫萬於興建香港大會堂',
+                      '香港大會堂', '承包工程',
+                      '石材', '大會堂'],
+
+      step3Photo:    '全組在曾大屋村口或主要建築前，擺出「開村傳承」姿勢拍攝合照。',
+      password:      'VillageLegacy',
+    },
+
+  ]; // STATIONS_B 前半段結束（B1–B5）
+</script>
+<script>
+  /* ===================================================
+     B 組 — 東鐵線站點數據（B6–B9）
+     續接 STATIONS_B 陣列
+  =================================================== */
+  STATIONS_B.push(
+
+    /* -------- B6：車公廟 -------- */
+    {
+      code:          'B6',
+      name:          '車公廟',
+      imgUrl:        'images/b6.jpg',
+      imgAlt:        '📷 車公廟：沙田著名傳統廟宇，以轉動風車祈福聞名',
+      poem:          '曾氏舊村過橋行，車公轉輪驅疫靈。',
+
+      step1Question: '請進入車公廟，觀察廟內的介紹與歷史說明，準備回答以下通關任務。',
+      step1Ans:      ['*'],
+
+      step2Task:     '根據車公廟的傳說與介紹，車公廟建廟的主要原因是為了什麼？請用簡短詞語回答。',
+      step2Ans:      ['為求驅除疫症', '驅除疫症',
+                      '驅疫', '除疫', '治疫',
+                      '消除疫症', '驅瘟',
+                      '消災除疫', '瘟疫',
+                      '驅除瘟疫', '疫症',
+                      '求驅疫', '驅除'],
+
+      step3Photo:    '全組在車公廟前拍攝合照。',
+      password:      'TemplePrayer',
+    },
+
+    /* -------- B7：大圍舊村後巷 -------- */
+    {
+      code:          'B7',
+      name:          '大圍舊村後巷',
+      imgUrl:        'images/b7.jpg',
+      imgAlt:        '📷 大圍舊村後巷：充滿歷史感的舊鐵閘與古老巷道',
+      poem:          '車公橋邊舊村深，後巷鐵閘藏舊痕。',
+
+      step1Question: '在 Che Kung Bridge 上指定位置，由工作人員或隊伍成員拍攝一張全組合照，畫面需包括橋上欄杆及河道景觀。完成後按提交。',
+      step1Ans:      ['*'],
+
+      step2Task:     '走進大圍舊村較窄的後巷，挑戰以下問題：\n\n題目一：關於大圍舊村巷道格局，以下哪項描述最為準確？\nA. 巷道採用棋盤式規劃，方便居民快速疏散；\nB. 巷道狹窄曲折，具有防禦功能，可阻慢入侵者；\nC. 巷道寬闊筆直，方便運送農產品出入；\nD. 巷道設計以風水為主，按八卦方位排列。\n\n題目二：假如你是一位住在後巷的舊村居民，以下哪項最能形容後巷空間的日常用途？\nA. 主要用作停泊私家車及電單車；\nB. 作為商店的後門卸貨區，繁忙而嘈雜；\nC. 晾曬衣物、鄰里閒聊的生活延伸空間；\nD. 用作隔離病患的臨時醫療區域。',
+      step2Ans:      ['bc', 'b,c', 'b c',
+                      '1b2c', '1.b2.c',
+                      'b和c', 'b及c',
+                      '題目一b題目二c',
+                      '一b二c', 'b', 'c',
+                      '題一b題二c'],
+
+      step3Photo:    '全組在所選最具歷史感的舊鐵閘或舊門前，擺出「舊巷尋跡」姿勢拍攝合照。',
+      password:      'AlleyTrace',
+    },
+
+    /* -------- B8：九龍塘站 -------- */
+    {
+      code:          'B8',
+      name:          '九龍塘站',
+      imgUrl:        'images/b8.jpg',
+      imgAlt:        '📷 九龍塘站：東鐵線月台書法牆，背景可見九龍塘住宅群',
+      poem:          '又一城中電梯網，九龍塘外層層疊。',
+
+      step1Question: '又一城內的扶手電梯設計呈縱橫交錯狀，如同蜘蛛網般分布。請簡要說明這種設計的主要原因。',
+      step1Ans:      ['引導人流', '人流',
+                      '引導人流經過最多商舖',
+                      '方便不同樓層', '快速轉換動線',
+                      '令人流平均', '增加逗留時間',
+                      '消費機會', '增加消費',
+                      '分布各層', '人流分布',
+                      '逗留', '商舖', '動線'],
+
+      step2Task:     '建新中心最標誌性的「太空時代」設計元素包括以下哪一項？\nA. 頂層的圓形旋轉餐廳，可360度飽覽九龍景色；\nB. 1樓圓拱形窗門，呼應1960至70年代的太空時代建築風格；\nC. 外牆的金屬鋁板幕牆，反射陽光如太空船外殼；\nD. 地下層的球形噴水池，象徵太空星球運行軌跡。',
+      step2Ans:      ['b', 'b.', '選b', '答b',
+                      '1樓圓拱形窗門',
+                      'b1樓圓拱形窗門',
+                      '圓拱形', '圓拱形窗門',
+                      '1樓圓拱', '太空時代',
+                      '拱形窗'],
+
+      step3Photo:    '全組在建新中心外（以聯合道視角為主），擺出「層層疊疊」姿勢拍攝合照。',
+      password:      'LayeredCity',
+    },
+
+    /* -------- B9：上海街618唐樓群 -------- */
+    {
+      code:          'B9',
+      name:          '上海街 618 唐樓群',
+      imgUrl:        'images/b9.jpg',
+      imgAlt:        '📷 旺角：上海街 618 號——活化唐樓文創地標，新舊融合外觀',
+      poem:          '旺角東站喧鬧過，上海街舊唐樓藏時光膠囊。',
+
+      step1Question: '請在地圖上找出上海街 618 唐樓群，並估計：由目前位置（地鐵站出閘位置）步行至該唐樓群大約需要多少分鐘，寫下預計時間。（估算步速為 3.3km/h）',
+      step1Ans:      ['15', '16', '17',
+                      '15分鐘', '16分鐘', '17分鐘',
+                      '15-17', '15至17', '15到17',
+                      '15–17分鐘', '約15', '約16', '約17',
+                      '十五', '十六', '十七',
+                      '十五分鐘', '十六分鐘', '十七分鐘'],
+
+      step2Task:     '在上海街 618 唐樓群的騎樓下，觀察柱子及上方層層疊疊的舊字樣。這些字以前主要用作哪一種用途？請以簡短詞語回答。',
+      step2Ans:      ['廣告招牌字', '商號名稱',
+                      '店舖招牌用字', '廣告',
+                      '招牌', '商號',
+                      '廣告招牌', '店舖招牌',
+                      '招牌字', '廣告字',
+                      '商業廣告', '店號',
+                      '廣告用途', '招牌用途'],
+
+      step3Photo:    '全組在上海街 618 唐樓群的騎樓下（以柱子或舊招牌最明顯處為背景），擺出「歲月時光膠囊」姿勢拍攝合照。',
+      password:      'TimeCapsule',
+    }
+
+  ); // STATIONS_B.push 結束（B6–B9）
+</script>
+<script>
+  /* ===================================================
+     鍵盤 Enter 快捷鍵支援
+  =================================================== */
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    const active = document.querySelector('.page.active');
+    if (!active) return;
+
+    // 登入頁
+    if (active.id === 'page-login') {
+      handleLogin();
+      return;
+    }
+
+    // 站點詳情頁
+    if (active.id === 'page-station') {
+      const idx = STATE.currentStation;
+      const prog = STATE.stationProgress[idx] || 0;
+      if (prog === 0) { submitStep1(idx); return; }
+      if (prog === 1) { submitStep2(idx); return; }
+      if (prog === 2) { submitStep3(idx); return; }
+    }
+  });
+
+  /* ===================================================
+     防止表單意外提交
+  =================================================== */
+  document.addEventListener('submit', function(e) {
+    e.preventDefault();
+  });
+
+  /* ===================================================
+     iOS Safari 100vh 修正
+  =================================================== */
+  function fixVH() {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+  fixVH();
+  window.addEventListener('resize', fixVH);
+
+  /* ===================================================
+     頁面可見度變更時自動儲存進度
+  =================================================== */
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden' && STATE.group) {
+      saveProgress();
+    }
+  });
+
+  /* ===================================================
+     登入頁 Input 按 Enter 直接登入
+  =================================================== */
+  document.getElementById('teamNameInput')
+    .addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') handleLogin();
+    });
+
+  /* ===================================================
+     頁面初始化：檢查是否有已儲存進度
+  =================================================== */
+  (function init() {
+    const saved = loadProgress();
+    if (saved && saved.teamName && saved.group) {
+      // 有儲存進度，預填登入表單提示使用者
+      document.getElementById('teamNameInput').value = saved.teamName;
+      selectGroup(saved.group);
+
+      // 顯示提示訊息
+      document.getElementById('loginAlert').innerHTML = `
+        <div class="alert alert-info">
+          💾 檢測到上次進度（${saved.teamName} · ${saved.group === 'A' ? '港島線 A 組' : '東鐵線 B 組'}）。
+          按「開始冒險」即可恢復進度。
+        </div>
+      `;
+    }
+
+    // 確保登入頁為預設顯示頁面
+    showPage('login');
+  })();
+
+  /* ===================================================
+     工具函式補充：重設單關進度（供管理員使用）
+  =================================================== */
+  function resetStation(idx) {
+    if (typeof idx === 'number' && idx >= 0 && idx < STATE.totalStations) {
+      STATE.stationProgress[idx] = 0;
+      saveProgress();
+      showToast(`🔄 第 ${idx + 1} 關進度已重設`, 'info');
+      renderHome();
+    }
+  }
+
+  /* ===================================================
+     工具函式補充：一鍵跳關（供測試使用）
+  =================================================== */
+  function skipToStation(idx) {
+    if (typeof idx !== 'number') return;
+    for (let i = 0; i < idx; i++) {
+      STATE.stationProgress[i] = 3;
+    }
+    STATE.currentStation = idx;
+    saveProgress();
+    renderHome();
+    showToast(`⏭️ 已跳至第 ${idx + 1} 關`, 'info');
+  }
+
+  /* ===================================================
+     手勢滑動支援（左滑返回主頁）
+  =================================================== */
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    const dy = e.changedTouches[0].screenY - touchStartY;
+    // 右滑（>80px 且水平移動大於垂直移動）→ 返回主頁
+    if (dx > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      const active = document.querySelector('.page.active');
+      if (active && active.id === 'page-station') {
+        goHome();
+      }
+    }
+  }, { passive: true });
+
+</script>
+
+</body>
+</html>
